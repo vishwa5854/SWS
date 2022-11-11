@@ -10,7 +10,10 @@ char** readdirs(char* dirname) {
 	struct dirent *dirp;
 	char** dirs;
 
-	dirs = malloc(INT_MAX * sizeof(char*));
+	if ((dirs = malloc(INT_MAX * sizeof(char*))) == NULL) {
+		perror("Could not allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
 	if ((dir = opendir(dirname)) == NULL) {
 		perror("Cound not open directory\n");
 		exit(EXIT_FAILURE);
@@ -18,7 +21,10 @@ char** readdirs(char* dirname) {
 	int count = 0;
 	while((dirp = readdir(dir)) != NULL) {
 		int templen = strlen(dirp->d_name);
-		dirs[count] = malloc(templen * sizeof(char*));
+		((dirs[count] = malloc(templen * sizeof(char*))) == NULL) {
+			perror("Could not allocate memory\n");
+			exit(EXIT_FAILURE);
+		}
 		(void) strncpy(dirs[count], dirp->d_name, templen);
 		count++;
 	}

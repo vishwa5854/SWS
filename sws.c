@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "flags.h"
@@ -8,9 +9,9 @@ int main(int argc, char **argv) {
     struct flags_struct flags = {0};
     
     // default flags
-
+    int opt;
     while ((opt = getopt(argc, argv, "c:dhi:l:p:")) != -1) {
-        switch (getopt_ret) {
+        switch (opt) {
             case 'c':
                 flags.c_flag = 1;
                 break;
@@ -33,6 +34,9 @@ int main(int argc, char **argv) {
                 return EXIT_FAILURE;
         }
     }
+    // This effectively removes flags from argc and argv.
+    argc -= optind;
+    argv += optind;
 
     // running as a daemon should be its own func, due to -d
     // logging should be its own func, due to -l

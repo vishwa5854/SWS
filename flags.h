@@ -9,6 +9,6 @@ struct flags_struct {
     unsigned int i_flag : 1;
     unsigned int l_flag : 1;
     unsigned int p_flag : 1;
-}
+};
 
 #endif /* FLAGS_H */

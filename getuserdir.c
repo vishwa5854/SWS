@@ -33,7 +33,7 @@ char** getuserdir(char* username) {
 	(void) strncpy(swsdir, "/home/", strlen("/home/"));
 	(void) strncat(swsdir, user, strlen(user));
 	(void) strncat(swsdir, "sws", strlen("sws"));
-	char** dirs = readdirs(swsdir, 0);	
+	char** dirs = readdirs(swsdir);	
 	return(dirs);
 }
 

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-char** readdirs(char* dirname) {
+char** readdirs(char* dirname, int flag) {
 	DIR* dir;
 	struct dirent *dirp;
 	/* Going with a double pointer for a string array */
@@ -29,7 +29,7 @@ char** readdirs(char* dirname) {
 	/* Doing a +1 for termination with \0*/
 	(void) strncpy(indexfile, dirname, dirlen + 1);
 	(void) strncat(indexfile, "/index.html", INDEX_SIZE - 1);
-	if (access(indexfile, R_OK) == 0) {
+	if (access(indexfile, R_OK) == 0 && flag) {
 		FILE *fp;
 		if ((fp = fopen(indexfile, "r")) == NULL) {
 			perror("Could not open index file\n");

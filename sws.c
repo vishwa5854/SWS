@@ -15,19 +15,19 @@ int main(int argc, char **argv) {
                 flags.c_flag = 1;
                 break;
             case 'd':
-                flags.c_flag = 1;
+                flags.d_flag = 1;
                 break;
             case 'h':
-                flags.c_flag = 1;
+                flags.h_flag = 1;
                 break;
             case 'i':
-                flags.c_flag = 1;
+                flags.i_flag = 1;
                 break;
             case 'l':
-                flags.c_flag = 1;
+                flags.l_flag = 1;
                 break;
             case 'p':
-                flags.c_flag = 1;
+                flags.p_flag = 1;
                 break;
             case '?':
                 return EXIT_FAILURE;

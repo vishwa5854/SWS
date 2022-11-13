@@ -8,6 +8,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/stat.h>
+
 char** readdirs(char* dirname) {
 	DIR* dir;
 	struct dirent *dirp;
@@ -19,21 +21,31 @@ char** readdirs(char* dirname) {
 		perror("Could not allocate memory\n");
 		return(NULL);
 	}
-	if ((dir = opendir(dirname)) == NULL) {
-		perror("Cound not open directory\n");
-		return(NULL);
-	}
 	int count = 0;
 	int dirlen = strlen(dirname);
 	char indexfile[dirlen + INDEX_SIZE];
 	/* Doing a +1 for termination with \0*/
 	(void) strncpy(indexfile, dirname, dirlen + 1);
 	(void) strncat(indexfile, "/index.html", INDEX_SIZE - 1);
-	if (access(indexfile, R_OK) == 0) {
+	struct stat sb;
+	if (stat(dirname, &sb) != 0) {
+		perror("Could not open file\n");
+		return(NULL);
+	}
+	int isDir = S_ISDIR(sb.st_mode);
+	if (access(indexfile, R_OK) == 0 || !isDir) {
 		FILE *fp;
-		if ((fp = fopen(indexfile, "r")) == NULL) {
-			perror("Could not open index file\n");
-			return(NULL);
+		if (!isDir) {
+			if ((fp = fopen(dirname, "r")) == NULL) {
+				perror("Could not open file\n");
+				return(NULL);
+			}
+		}
+		else {
+			if ((fp = fopen(indexfile, "r")) == NULL) {
+				perror("Could not open index file\n");
+				return(NULL);
+			}
 		}
 		ssize_t temp;
 		char* line = NULL;
@@ -49,6 +61,10 @@ char** readdirs(char* dirname) {
 		}
 	}
 	else {
+		if ((dir = opendir(dirname)) == NULL) {
+                  	perror("Cound not open directory\n");
+                  	return(NULL);
+          	}
 		while((dirp = readdir(dir)) != NULL) {
 			int templen = strlen(dirp->d_name);
 			if ((dirs[count] = malloc(templen * sizeof(char*))) == NULL) {

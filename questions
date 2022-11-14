@@ -1,0 +1,8 @@
+1. It is mentioned that we should send Content-Type: text/html
+    but if the request for directory indexing, does that mean
+    we should allow hyper links ?
+2. Server A string identifying this server and version. -> SWS ??
+3. Last-Modified The timestamp in GMT of the file’s last modification date
+    What should be returned for a directory ? 
+    What should be returned for a invalid file that doesn't exist?
+4. 

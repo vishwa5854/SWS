@@ -5,4 +5,5 @@
 3. Last-Modified The timestamp in GMT of the file’s last modification date
     What should be returned for a directory ? 
     What should be returned for a invalid file that doesn't exist?
-4. 
+4. Do we need to support <1.0 and >1.0 ??
+    What is the expected output for such cases, what will be the status code?

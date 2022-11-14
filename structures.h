@@ -41,6 +41,11 @@
 /** We will only send text/html but we will do the optional type if we have time :) */
 #define CONTENT_TYPE_MAX_LEN 10
 
+/** 
+ * Sample HTTP Request looks like this
+ * GET '/file' HTTP/1.0
+ * If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT
+*/
 typedef struct HTTP_REQUEST {
     char verb[HTTP_VERB_MAX_LEN];
     char path[PATH_MAX];

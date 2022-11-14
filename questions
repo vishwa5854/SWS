@@ -7,3 +7,11 @@
     What should be returned for a invalid file that doesn't exist?
 4. Do we need to support <1.0 and >1.0 ??
     What is the expected output for such cases, what will be the status code?
+5. What is the status code to be returned if the request has a method that
+    we don't support? Eg: POST
+6. What should be the output for GET '/../../../../../../../../../etc/passwd' HTTP/1.0
+    and GET '/dir/file/../../dir/file' HTTP/1.0
+7. What all request headers are we supposed to get as input / we should handle?
+8. If-Modified-Since Request-Header is this the only header we support for request?
+9. Keep-Alive: will we support this ?
+10. INADDR_ANY

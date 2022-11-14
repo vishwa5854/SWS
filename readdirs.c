@@ -8,9 +8,22 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/param.h>
 #include <sys/stat.h>
 
 char** readdirs(char* dirname) {
+	char path[PATH_MAX];
+	if (realpath(dirname, path) == NULL) {
+		return(NULL);
+	}
+	char cwd[PATH_MAX];
+	if (getcwd(cwd, sizeof(cwd)) == NULL) {
+		return(NULL);
+	}
+	/* Lock user in the current working directory */
+	if (strncmp(dirname, cwd, strlen(cwd)) != 0) {
+		return(NULL);
+	}
 	DIR* dir;
 	struct dirent *dirp;
 	/* Going with a double pointer for a string array */
@@ -71,8 +84,10 @@ char** readdirs(char* dirname) {
 				perror("Could not allocate memory\n");
 				return(NULL);
 			}
-			(void) strncpy(dirs[count], dirp->d_name, templen);
-			count++;
+			if (strncmp(dirp->d_name, ".", 1) != 0) {
+				(void) strncpy(dirs[count], dirp->d_name, templen);
+				count++;
+			}
 		}
 	}
 	return(dirs);

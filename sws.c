@@ -14,7 +14,7 @@
 #include "flags.h"
 
 #define BACKLOG 5
-#define SLEEP_FOR 10
+#define SLEEP_FOR 5
 
 int createSocket(int port) {
 	int sock;
@@ -123,8 +123,8 @@ int main(int argc, char **argv) {
         struct timeval to;
         FD_ZERO(&ready);
         FD_SET(socket, &ready);
-        to.tv_sec = 0;
-        to.tv_usec = SLEEP_FOR;
+        to.tv_sec = SLEEP_FOR;
+        to.tv_usec = 0;
 
         if (select(socket + 1, &ready, 0, 0, &to) < 0) {
             if (errno != EINTR) {
@@ -135,8 +135,6 @@ int main(int argc, char **argv) {
 
         if (FD_ISSET(socket, &ready)) {
             handleSocket(socket);
-        } else {
-            (void)printf("Idly sitting here, waiting for connections...\n");
         }
     }
     

@@ -17,7 +17,7 @@
 8. If-Modified-Since Request-Header is this the only header we support for request?
 9. Keep-Alive: will we support this ?
 10. INADDR_ANY PF_UNSPEC
-11. Lean telnet
+11. Learn telnet
 12. Send bad request for protocol greater than 1.0
 13. Handle invalid request headers and send a response saying invalid request 400
 14. Use magic for content-type

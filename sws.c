@@ -118,6 +118,7 @@ int main(int argc, char **argv) {
     /** TODO: replace the zero here with the user specified port from the parsed args @lucas */
     int socket = createSocket(0);
 
+    /** This code has been referenced from CS631 APUE class notes apue-code/09 */
     while (1) {
         fd_set ready;
         struct timeval to;

@@ -1,5 +1,6 @@
 #include "handler.h"
 
+/** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
     const char *rip;
     int rval;
@@ -28,6 +29,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     /* NOTREACHED */
 }
 
+/** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleSocket(int socket) {
     int fd;
     pid_t pid;

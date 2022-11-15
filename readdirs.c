@@ -21,7 +21,7 @@ char** readdirs(char* dirname) {
 	int count = 0;
 	while((dirp = readdir(dir)) != NULL) {
 		int templen = strlen(dirp->d_name);
-		((dirs[count] = malloc(templen * sizeof(char*))) == NULL) {
+		if ((dirs[count] = malloc(templen * sizeof(char*))) == NULL) {
 			perror("Could not allocate memory\n");
 			exit(EXIT_FAILURE);
 		}

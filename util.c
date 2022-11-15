@@ -79,13 +79,13 @@ void get_status_verb(int status_code, char* status_verb) {
     }
 }
 
-bool create_request_frame(REQUEST* request, char* request_str, int request_str_length) {
-    bool valid = true;
+// bool create_request_frame(REQUEST* request, char* request_str, int request_str_length) {
+//     bool valid = true;
 
     /** 
      * No matter how many lines or headers you give me 
     */
     // realpath
 
-    return valid;
-}
+//     return valid;
+// }

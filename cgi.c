@@ -10,6 +10,9 @@
 #include "cgi.h"
 
 #define BUFFER_SIZE 64
+// TODO add all the code inside the while and send return to socket
+// TODO check whether the file has permission to execute the file 
+// TODO check whether the files are in the same parent directory 
 
 int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen)
 {
@@ -57,7 +60,7 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
         perror("Could not create child process (fork() failed).");
         break; /* Carry on to reset signal attributes */
 
-    case 0: /* Child: exec command */
+    case 0: /* Child: exec CGI */
         // Closing one end of the pipes
         if (close(stdout_pipe[0]))
         {
@@ -189,11 +192,22 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
 }
 
 /* main function to test out the functionality using ls */
-int main()
+int main(int argc,char **argv)
 {
     char outbuf[BUFFER_SIZE], errbuf[BUFFER_SIZE];
+    char *locationofexe;
+    char* baseDirectory="/";//TODO this has to be changed in the integration
+    (void)argc;
 
-    if (execute_file("ls .", outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1) < 0)
+
+    locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1]+sizeof(baseDirectory))));
+    locationofexe=strcat(locationofexe,baseDirectory);
+    locationofexe=strcat(locationofexe,argv[1]);
+    printf("%s",locationofexe);
+  
+    
+
+   if (execute_file(locationofexe, outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1) < 0)   
     {
         perror("command function failed.");
         return -1;

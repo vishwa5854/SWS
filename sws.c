@@ -6,12 +6,11 @@
 #include <arpa/inet.h>
 #include "flags.h"
 
+// backlog used for listen, maybe change from 5? see listen(2)
 #define BACKLOG 5
 
 // creates a socket. returns descriptor referencing the socket, or -1 on error.
-int
-createSocket(void)
-{
+int createSocket(void) {
 	int sock;
 	socklen_t length;
 	struct sockaddr_in6 server;
@@ -50,33 +49,51 @@ createSocket(void)
 	return sock;
 }
 
+void printUsage(char* progName) {
+    fprintf(stderr, "usage: %s [-dh] [-c dir] [-i address] [-l file] [-p port] dir\n", progName);
+}
+
 int main(int argc, char **argv) {
 
-    // Create new flags struct, initializing all flags to 0
+    // Create new flags struct, initializing all flags to 0 and args to null
     struct flags_struct flags = {0};
 
+    // just so we use the flags struct for now, and dont get compilation error
     (void) flags;
+
+    // defaults are to listen on all ipv4 and ipv6 addresses, and port 8080
+    // use INADDR_ANY to listen for all available ips
+    strncpy(flags.port_arg, "8080", 5);
+
     
-    // default flags
+    // for each optarg case, we copy the exact data needed, then explicitly add null byte
     int opt;
     while ((opt = getopt(argc, argv, "c:dhi:l:p:")) != -1) {
         switch (opt) {
             case 'c':
+                strncpy(flags.cdi_dir_arg, optarg, PATH_MAX);
+                flags.cdi_dir_arg[PATH_MAX] = '\0';
                 flags.c_flag = 1;
                 break;
             case 'd':
                 flags.d_flag = 1;
                 break;
             case 'h':
-                flags.h_flag = 1;
-                break;
+                printUsage(argv[0]);
+                return EXIT_SUCCESS;
             case 'i':
+                strncpy(flags.addr_arg, optarg, 45);
+                flags.addr_arg[45] = '\0';
                 flags.i_flag = 1;
                 break;
             case 'l':
+                strncpy(flags.log_file_arg, optarg, PATH_MAX);
+                flags.log_file_arg[PATH_MAX] = '\0';
                 flags.l_flag = 1;
                 break;
             case 'p':
+                strncpy(flags.port_arg, optarg, 6);
+                flags.port_arg[5] = '\0';
                 flags.p_flag = 1;
                 break;
             case '?':
@@ -87,13 +104,25 @@ int main(int argc, char **argv) {
     argc -= optind;
     argv += optind;
 
-    // running as a daemon should be its own func, due to -d
-    // logging should be its own func, due to -l
+    
+    /*
+    if (!flags.d_flag) {
+        int daemon_ret;
+        if ((daemon_ret = daemon(0, 0)) == -1){
+            perror("creating daemon");
+		    return EXIT_FAILURE;
+        }
+        // our process is now a daemon.
 
-    createSocket();
+        // here we fork and handle any number of connections
+        
+    } else {
+        // debug mode here
+        // accept one connection at a time, log to stdout
+    }
+    */
 
-    // we want to use fork to create any number of sockets to handle connections
-    // using child processes!
+    // make sure to properly clean up before exiting!
 
     return EXIT_SUCCESS;
 }

@@ -1,22 +1,27 @@
+#define INDEX_SIZE	12
+
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <unistd.h>
 
 char** readdirs(char* dirname) {
 	DIR* dir;
 	struct dirent *dirp;
+	/* Going with a double pointer for a string array */
 	char** dirs;
 
-	if ((dirs = malloc(INT_MAX * sizeof(char*))) == NULL) {
+	/* Straight out max size to avoid any errors due to length*/
+	if((dirs = malloc(INT_MAX * sizeof(char*))) == NULL) {
 		perror("Could not allocate memory\n");
-		exit(EXIT_FAILURE);
+		return(NULL);
 	}
 	if ((dir = opendir(dirname)) == NULL) {
 		perror("Cound not open directory\n");
-		exit(EXIT_FAILURE);
+		return(NULL);
 	}
 	int count = 0;
 	while((dirp = readdir(dir)) != NULL) {
@@ -25,8 +30,6 @@ char** readdirs(char* dirname) {
 			perror("Could not allocate memory\n");
 			exit(EXIT_FAILURE);
 		}
-		(void) strncpy(dirs[count], dirp->d_name, templen);
-		count++;
 	}
 	return(dirs);
 }

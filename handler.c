@@ -3,7 +3,7 @@
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
     const char *rip;
-    int rval;
+    int client_request;
     char claddr[INET6_ADDRSTRLEN];
 
     if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
@@ -17,14 +17,14 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         char buf[BUFSIZ];
         bzero(buf, sizeof(buf));
 
-        if ((rval = read(fd, buf, BUFSIZ)) < 0) {
+        if ((client_request = read(fd, buf, BUFSIZ)) < 0) {
             perror("reading stream message");
-        } else if (rval == 0) {
+        } else if (client_request == 0) {
             printf("Ending connection from %s.\n", rip);
         } else {
             printf("Client (%s) sent: %s", rip, buf);
         }
-    } while (rval != 0);
+    } while (client_request != 0);
     (void)close(fd);
     /* NOTREACHED */
 }

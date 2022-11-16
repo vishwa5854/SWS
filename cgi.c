@@ -15,7 +15,7 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
 {
     if (string == NULL) /* Is a shell available? */
     {
-        return command(":", outbuf, outlen, errbuf, errlen);
+        return execute_file(":", outbuf, outlen, errbuf, errlen);
     }
 
     int stdout_pipe[2];
@@ -193,7 +193,7 @@ int main()
 {
     char outbuf[BUFFER_SIZE], errbuf[BUFFER_SIZE];
 
-    if (command("ls .", outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1) < 0)
+    if (execute_file("ls .", outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1) < 0)
     {
         perror("command function failed.");
         return -1;

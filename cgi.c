@@ -14,12 +14,26 @@
 // TODO check whether the file has permission to execute the file 
 // TODO check whether the files are in the same parent directory 
 
-int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen)
+int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen,char *fileName)
 {
+    char *tempDirectory="/tmp/";
+    char *locationoftempfile;
+    (void)locationoftempfile;
+    (void)tempDirectory;
+
     if (string == NULL) /* Is a shell available? */
     {
-        return execute_file(":", outbuf, outlen, errbuf, errlen);
+        return execute_file(":", outbuf, outlen, errbuf, errlen,fileName);
     }
+    // tempFileLocation=
+    // fd=open()
+
+    printf("\n %s \n",fileName);
+    locationoftempfile=(char *)malloc(sizeof(char)*(sizeof(tempDirectory)+sizeof(fileName)));
+    locationoftempfile=strcat(locationoftempfile,tempDirectory);
+    locationoftempfile=strcat(locationoftempfile,fileName);
+    printf("\n %s \n",locationoftempfile);
+
 
     int stdout_pipe[2];
     int stderr_pipe[2];
@@ -192,26 +206,29 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
 }
 
 /* main function to test out the functionality using ls */
-int main(int argc,char **argv)
+int main(int argc,char **argv)// send the filename 
 {
     char outbuf[BUFFER_SIZE], errbuf[BUFFER_SIZE];
     char *locationofexe;
     char* baseDirectory="/";//TODO this has to be changed in the integration
-    (void)argc;
+    char *tempFileName="siddharth"+'\0';
+    (void)argc;//TODO Remove
 
 
-    locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1]+sizeof(baseDirectory))));
+    locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1])+sizeof(baseDirectory)+sizeof('\0')));
     locationofexe=strcat(locationofexe,baseDirectory);
+    argv[1]=argv[1]+'\0';
     locationofexe=strcat(locationofexe,argv[1]);
-    printf("%s",locationofexe);
+    printf("%s",locationofexe);//TODO Remove
   
     
 
-   if (execute_file(locationofexe, outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1) < 0)   
+   if (execute_file(locationofexe, outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1,tempFileName) < 0)   
     {
         perror("command function failed.");
         return -1;
     }
+    
 
     outbuf[BUFFER_SIZE - 1] = '\0';
     errbuf[BUFFER_SIZE - 1] = '\0';

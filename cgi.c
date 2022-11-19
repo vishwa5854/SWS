@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -16,24 +18,53 @@
 
 int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen,char *fileName)
 {
+    
+    
     char *tempDirectory="/tmp/";
+
+    char *locationoferrtempfile;
+    int temperrfd=0;
+    char *temperrTempFile="err";//TODO check if this what is required from my side
+    int readPipeBuf;
+    int readPipeErrBuf;
+
+
     char *locationoftempfile;
+    int tempfd=0;
     (void)locationoftempfile;
-    (void)tempDirectory;
+    
 
     if (string == NULL) /* Is a shell available? */
     {
         return execute_file(":", outbuf, outlen, errbuf, errlen,fileName);
     }
-    // tempFileLocation=
-    // fd=open()
-
-    printf("\n %s \n",fileName);
+    
     locationoftempfile=(char *)malloc(sizeof(char)*(sizeof(tempDirectory)+sizeof(fileName)));
     locationoftempfile=strcat(locationoftempfile,tempDirectory);
-    locationoftempfile=strcat(locationoftempfile,fileName);
+    locationoftempfile=strcat(locationoftempfile,fileName);/* Safe file location to store buffer*/
     printf("\n %s \n",locationoftempfile);
 
+    if ((tempfd=open(locationoftempfile, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR  ))<0){
+        perror("Could Not create the tmp file");
+        return -1;
+    }
+
+    (void)readPipeErrBuf;
+    (void) readPipeBuf;
+    (void) temperrfd;
+    
+    printf("\n%d\n",tempfd);
+
+    locationoferrtempfile=(char *)malloc(sizeof(char)*(sizeof(tempDirectory)+sizeof(temperrTempFile)+sizeof(fileName)));
+    locationoferrtempfile=strcat(locationoferrtempfile,tempDirectory);
+    locationoferrtempfile=strcat(locationoferrtempfile,temperrTempFile);
+    locationoferrtempfile=strcat(locationoferrtempfile,fileName);
+    printf("\n %s \n",locationoferrtempfile);
+
+    if ((temperrfd=open(locationoferrtempfile, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR  ))<0){
+        perror("Could Not create the tmp file");
+        return -1;
+    }
 
     int stdout_pipe[2];
     int stderr_pipe[2];
@@ -150,45 +181,61 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
         }
 
         // Ensuring outbuf is not already full
-        if (stdout_index < outlen)
-        {
-            while ((num_elements_read = (read(stdout_pipe[0], buffer, BUFFER_SIZE))) > 0)
-            {
-                if (num_elements_read + stdout_index > outlen)
-                {
-                    num_elements_read = outlen - stdout_index;
-                }
-                for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stdout_index)
-                {
-                    outbuf[stdout_index] = buffer[i];
-                }
-            }
-            // Null terminating if space permits
-            if (stdout_index < outlen)
-            {
-                outbuf[stdout_index] = '\0';
-            }
+        //TODO remove need to play here 
+
+        while((readPipeBuf=read(stdout_pipe[0],buffer, BUFFER_SIZE))!=-1 && readPipeBuf !=0 ){
+                //TODO REMOVE printf("read data value %d",read_data);
+                printf("Writing\n");
+                write(tempfd,buffer,readPipeBuf);// read data may contain
         }
-        // Ensuring outbuf is not already full
-        if (stderr_index < errlen)
-        {
-            while ((num_elements_read = (read(stderr_pipe[0], buffer, BUFFER_SIZE))) > 0)
-            {
-                if (num_elements_read + stderr_index > errlen)
-                {
-                    num_elements_read = errlen - stderr_index;
-                }
-                for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stderr_index)
-                {
-                    errbuf[stderr_index] = buffer[i];
-                }
-            }
-            // Null terminating if space permits
-            if (stderr_index < errlen)
-            {
-                errbuf[stderr_index] = '\0';
-            }
+        
+        while((readPipeErrBuf=read(stderr_pipe[0],buffer, BUFFER_SIZE))!=-1 && readPipeErrBuf !=0){
+            printf("Writing\n");
+            write(temperrfd,buffer,readPipeErrBuf);// read data may contain
         }
+
+        close(tempfd);
+        close(temperrfd);
+
+        // if (stdout_index < outlen)
+        // {
+        //     while ((num_elements_read = (read(stdout_pipe[0], buffer, BUFFER_SIZE))) > 0)
+        //     {
+        //         if (num_elements_read + stdout_index > outlen)
+        //         {
+        //             num_elements_read = outlen - stdout_index;
+        //         }
+        //         for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stdout_index)
+        //         {
+        //             outbuf[stdout_index] = buffer[i];
+        //         }
+        //     }
+        //     // Null terminating if space permits
+        //     if (stdout_index < outlen)
+        //     {
+        //         outbuf[stdout_index] = '\0';
+        //     }
+        // }
+        // // Ensuring outbuf is not already full
+        // if (stderr_index < errlen)
+        // {
+        //     while ((num_elements_read = (read(stderr_pipe[0], buffer, BUFFER_SIZE))) > 0)
+        //     {
+        //         if (num_elements_read + stderr_index > errlen)
+        //         {
+        //             num_elements_read = errlen - stderr_index;
+        //         }
+        //         for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stderr_index)
+        //         {
+        //             errbuf[stderr_index] = buffer[i];
+        //         }
+        //     }
+        //     // Null terminating if space permits
+        //     if (stderr_index < errlen)
+        //     {
+        //         errbuf[stderr_index] = '\0';
+        //     }
+        // }
         break;
     }
 
@@ -218,7 +265,7 @@ int main(int argc,char **argv)// send the filename
     locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1])+sizeof(baseDirectory)+sizeof('\0')));
     locationofexe=strcat(locationofexe,baseDirectory);
     argv[1]=argv[1]+'\0';
-    locationofexe=strcat(locationofexe,argv[1]);
+    locationofexe=strcat(locationofexe,argv[1]);// TODO convert to strlcat
     printf("%s",locationofexe);//TODO Remove
   
     

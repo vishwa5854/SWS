@@ -25,9 +25,6 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
     char *locationoferrtempfile;
     int temperrfd=0;
     char *temperrTempFile="err";//TODO check if this what is required from my side
-    int readPipeBuf;
-    int readPipeErrBuf;
-
 
     char *locationoftempfile;
     int tempfd=0;
@@ -48,10 +45,6 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
         perror("Could Not create the tmp file");
         return -1;
     }
-
-    (void)readPipeErrBuf;
-    (void) readPipeBuf;
-    (void) temperrfd;
     
     printf("\n%d\n",tempfd);
 
@@ -66,26 +59,10 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
         return -1;
     }
 
-    int stdout_pipe[2];
-    int stderr_pipe[2];
     sigset_t blockMask, origMask;
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
-    int stdout_index = 0;
-    int stderr_index = 0;
-
-    // Creating the pipes
-    if (pipe(stdout_pipe))
-    {
-        perror("Could not create STDOUT pipe");
-        return -1;
-    }
-    if (pipe(stderr_pipe))
-    {
-        perror("Could not create STDERR pipe");
-        return -1;
-    }
 
     sigemptyset(&blockMask); /* Block SIGCHLD */
     sigaddset(&blockMask, SIGCHLD);
@@ -106,28 +83,14 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
         break; /* Carry on to reset signal attributes */
 
     case 0: /* Child: exec CGI */
-        // Closing one end of the pipes
-        if (close(stdout_pipe[0]))
-        {
-            perror("Could not close the STDOUT pipe.");
-            status = -1;
-            break;
-        }
-        if (close(stderr_pipe[0]))
-        {
-            perror("Could not close the STDERR pipe.");
-            status = -1;
-            break;
-        }
-
         // Duplicating the file descriptors onto the write-ends of the pipes
-        if (dup2(stdout_pipe[1], STDOUT_FILENO) < 0)
+        if (dup2(tempfd, STDOUT_FILENO) < 0)
         {
             perror("Could not duplicate STDOUT file descriptor to the pipe.");
             status = -1;
             break;
         }
-        if (dup2(stderr_pipe[1], STDERR_FILENO) < 0)
+        if (dup2(temperrfd, STDERR_FILENO) < 0)
         {
             perror("Could not duplicate STDERR file descriptor to the pipe.");
             status = -1;
@@ -156,87 +119,12 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
 
         /* We must use waitpid() for this task; using wait() could inadvertently
            collect the status of one of the caller's other children */
-
         if (waitpid(childPid, &status, 0) < 0)
         {
             perror("Could not wait for child process; waitpid resulted in error.");
             status = -1;
             break;
         }
-        int num_elements_read;
-        char buffer[BUFFER_SIZE];
-
-        // Reading from the pipes
-        if (close(stdout_pipe[1]) < 0)
-        {
-            perror("Could not close the STDOUT pipe.");
-            status = -1;
-            break;
-        }
-        if (close(stderr_pipe[1]) < 0)
-        {
-            perror("Could not close the STDERR pipe.");
-            status = -1;
-            break;
-        }
-
-        // Ensuring outbuf is not already full
-        //TODO remove need to play here 
-
-        while((readPipeBuf=read(stdout_pipe[0],buffer, BUFFER_SIZE))!=-1 && readPipeBuf !=0 ){
-                //TODO REMOVE printf("read data value %d",read_data);
-                printf("Writing\n");
-                write(tempfd,buffer,readPipeBuf);// read data may contain
-        }
-        
-        while((readPipeErrBuf=read(stderr_pipe[0],buffer, BUFFER_SIZE))!=-1 && readPipeErrBuf !=0){
-            printf("Writing\n");
-            write(temperrfd,buffer,readPipeErrBuf);// read data may contain
-        }
-
-        close(tempfd);
-        close(temperrfd);
-
-        // if (stdout_index < outlen)
-        // {
-        //     while ((num_elements_read = (read(stdout_pipe[0], buffer, BUFFER_SIZE))) > 0)
-        //     {
-        //         if (num_elements_read + stdout_index > outlen)
-        //         {
-        //             num_elements_read = outlen - stdout_index;
-        //         }
-        //         for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stdout_index)
-        //         {
-        //             outbuf[stdout_index] = buffer[i];
-        //         }
-        //     }
-        //     // Null terminating if space permits
-        //     if (stdout_index < outlen)
-        //     {
-        //         outbuf[stdout_index] = '\0';
-        //     }
-        // }
-        // // Ensuring outbuf is not already full
-        // if (stderr_index < errlen)
-        // {
-        //     while ((num_elements_read = (read(stderr_pipe[0], buffer, BUFFER_SIZE))) > 0)
-        //     {
-        //         if (num_elements_read + stderr_index > errlen)
-        //         {
-        //             num_elements_read = errlen - stderr_index;
-        //         }
-        //         for (int i = 0; i < num_elements_read && buffer[i] != '\0'; ++i, ++stderr_index)
-        //         {
-        //             errbuf[stderr_index] = buffer[i];
-        //         }
-        //     }
-        //     // Null terminating if space permits
-        //     if (stderr_index < errlen)
-        //     {
-        //         errbuf[stderr_index] = '\0';
-        //     }
-        // }
-        break;
     }
 
     /* Unblock SIGCHLD, restore dispositions of SIGINT and SIGQUIT */
@@ -266,7 +154,7 @@ int main(int argc,char **argv)// send the filename
     locationofexe=strcat(locationofexe,baseDirectory);
     argv[1]=argv[1]+'\0';
     locationofexe=strcat(locationofexe,argv[1]);// TODO convert to strlcat
-    printf("%s",locationofexe);//TODO Remove
+    // printf("%s",locationofexe);//TODO Remove
   
     
 
@@ -280,8 +168,8 @@ int main(int argc,char **argv)// send the filename
     outbuf[BUFFER_SIZE - 1] = '\0';
     errbuf[BUFFER_SIZE - 1] = '\0';
 
-    printf("Got stdout: \n%s", outbuf);
-    printf("Got stderr: \n%s", errbuf);
+    // printf("Got stdout: \n%s", outbuf);
+    // printf("Got stderr: \n%s", errbuf);
 
     return 0;
 }

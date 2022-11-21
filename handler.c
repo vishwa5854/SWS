@@ -1,4 +1,5 @@
 #include "handler.h"
+#include "flags.h"
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
@@ -30,7 +31,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
-void handleSocket(int socket) {
+void handleSocket(int socket, struct flags_struct flags) {
     int fd;
     pid_t pid;
     struct sockaddr_in6 client;
@@ -42,6 +43,11 @@ void handleSocket(int socket) {
     if ((fd = accept(socket, (struct sockaddr *)&client, &length)) < 0) {
         perror("accept");
         return;
+    }
+
+    if (flags.d_flag) {
+        handleConnection(fd, client);
+        exit(EXIT_SUCCESS);
     }
 
     if ((pid = fork()) < 0) {

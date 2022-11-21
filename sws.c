@@ -59,7 +59,17 @@ void printUsage(char* progName) {
     fprintf(stderr, "usage: %s [-dh] [-c dir] [-i address] [-l file] [-p port] dir\n", progName);
 }
 
-int parse_args(int argc, char **argv) {
+void reap() {
+    wait(NULL);
+}
+
+int main(int argc, char **argv) {
+    if (signal(SIGCHLD, reap) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+        /* NOTREACHED */
+    }
+
     // Create new flags struct, initializing all flags to 0
     struct flags_struct flags = {0};
 
@@ -128,24 +138,6 @@ int parse_args(int argc, char **argv) {
     }
     */
 
-    // make sure to properly clean up before exiting!
-
-    return EXIT_SUCCESS;
-}
-
-void reap() {
-    wait(NULL);
-}
-
-int main(int argc, char **argv) {
-    if (signal(SIGCHLD, reap) == SIG_ERR) {
-        perror("signal");
-        exit(EXIT_FAILURE);
-        /* NOTREACHED */
-    }
-
-    parse_args(argc, argv);
-
     /** TODO: replace the zero here with the user specified port from the parsed args @lucas */
     int socket = createSocket(0);
 
@@ -166,7 +158,7 @@ int main(int argc, char **argv) {
         }
 
         if (FD_ISSET(socket, &ready)) {
-            handleSocket(socket);
+            handleSocket(socket, flags);
         }
     }
     

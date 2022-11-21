@@ -12,6 +12,27 @@
 /** 1.0 + '\0' */
 #define PROTOCOL_VERSION_MAX_LEN 4
 
+#define SERVER "z"
+
+#define CONTENT_TYPE_DEFAULT "text/html"
+
+#define SUPPORTED_PROTOCOL_1 "HTTP/1.0"
+
+#define SUPPORTED_PROTOCOL_2 "HTTP/0.9"
+
+#define SUPPORTED_HTTP_VERB_1 "GET"
+
+#define SUPPORTED_HTTP_VERB_2 "HEAD"
+
+#define SUPPORTED_PROTOCOL_ONLY "HTTP"
+
+#define SUPPORTED_VERSION_ONLY "1.0"
+
+#define SUPPORTED_HEADER "If-Modified-Since:"
+
+/** TODO: Update the regex for weekday as well */
+#define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
 /** 
  * Status-Code  = "200"   ; OK
  *              | "201"   ; Created
@@ -51,11 +72,12 @@ typedef struct HTTP_REQUEST {
     char path[PATH_MAX];
     char protocol[PROTOCOL_MAX_LEN];
     char version[PROTOCOL_VERSION_MAX_LEN];
+    char if_modified_since[DATE_MAX_LEN];
 } REQUEST;
 
 /**
  * Sample HTTP Response looks like this
- * HTTP/1.1 200 OK
+ * HTTP/1.0 200 OK
  * Date: Tue, 15 Nov 1994 08:12:31 GMT
  * Server: gws
  * Last-Modified: Mon, 14 Nov 2022 00:18:42 GMT

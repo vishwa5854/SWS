@@ -23,6 +23,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     REQUEST request;
     RESPONSE response;
     char response_string[BUFSIZ];
+    bzero(response_string, sizeof(response_string));
 
     do {
         char line_buffer[BUFSIZ];
@@ -58,18 +59,22 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                     is_valid_request = false;
                 }
 
+                /** Assigning status codes will be revisited. */
                 if (!is_valid_request) {
                     response.status_code = 400;
-                    get_status_verb(response.status_code, response.status_verb);
-                    (void)strncpy(response.server, SERVER, strlen(SERVER));
-                    (void)strncpy(response.content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
-                    get_gmt_date_str(response.date, DATE_MAX_LEN);
-                    (void)strncpy(response.protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
-                    (void)strncpy(response.version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
-                    response.last_modified[0] = '\0';
-                    response.content_length = 0;
                     /** We shouldn't terminate the request we have to wait until the user is done */
+                } else {
+                    response.status_code = 200;
                 }
+
+                (void)strncpy(response.server, SERVER, strlen(SERVER));
+                (void)strncpy(response.content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
+                get_gmt_date_str(response.date, DATE_MAX_LEN);
+                (void)strncpy(response.protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
+                (void)strncpy(response.version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
+                response.last_modified[0] = '\0';
+                response.content_length = 0;
+                get_status_verb(response.status_code, response.status_verb);
             }
             /** We stop taking anything else from client now */
             if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {

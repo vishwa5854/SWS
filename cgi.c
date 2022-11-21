@@ -140,7 +140,7 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
     return status;
 }
 
-/* main function to test out the functionality using ls */
+/* main function to test out the functionality using ls, TODO: this will not be used in final, it will be integrated with SWS */
 int main(int argc,char **argv)// send the filename 
 {
     char outbuf[BUFFER_SIZE], errbuf[BUFFER_SIZE];

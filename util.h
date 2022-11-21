@@ -10,7 +10,7 @@ int create_response_string(RESPONSE* response, char* response_str);
 
 /** This function will validate the request and set the request meta
  into the given request object. */
-bool create_request_frame(REQUEST* request, char* request_str, int request_str_length);
+bool create_request_frame(REQUEST* request, char* token, int token_number);
 
 /** This function will return a GMT string which looks like HTTP date
  Eg: Mon, 14 Nov 2022 00:18:42 GMT 

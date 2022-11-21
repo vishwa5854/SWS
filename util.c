@@ -1,6 +1,8 @@
 #include <limits.h>
+#include <regex.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include "util.h"
 
@@ -18,6 +20,7 @@ void get_gmt_date_str(char* time_str, size_t time_length) {
     }
 }
 
+/** TODO: Instead of taking a string, just take the filedescriptor and write to the stream instead :) */
 int create_response_string(RESPONSE* response, char* response_str) {
     if (response->protocol != NULL) {
         (void)sprintf(response_str, "%s", response->protocol);
@@ -131,7 +134,7 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            puts("Inside 1");
+            /** TODO: */
             return valid;
             // URI validation
             break;
@@ -154,8 +157,42 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
                 (void)strncpy(request->version, "1.0", 3);
             }
             break;
+        /** Not to confuse with token#4 instead used for If-Modified-Since header. */
+        case 3:
+            valid = is_valid_http_date(token);
+            if (valid) {
+                (void)strncpy(request->if_modified_since, token, strlen(token));
+            }
+            break;
         default:
             break;
     }
     return valid;
+}
+
+void reset_response_object(RESPONSE* response) {
+    bzero(response->protocol, sizeof(response->protocol));
+    bzero(response->version, sizeof(response->version));
+    bzero(response->status_verb, sizeof(response->status_verb));
+    bzero(response->date, sizeof(response->date));
+    bzero(response->server, sizeof(response->server));
+    bzero(response->last_modified, sizeof(response->last_modified));
+    bzero(response->content_type, sizeof(response->content_type));
+}
+
+void reset_request_object(REQUEST* request) {
+    bzero(request->if_modified_since, sizeof(request->if_modified_since));
+    bzero(request->verb, sizeof(request->verb));
+    bzero(request->path, sizeof(request->path));
+    bzero(request->protocol, sizeof(request->protocol));
+    bzero(request->version, sizeof(request->version));
+}
+
+bool is_valid_http_date(char* date) {
+    regex_t regex;
+
+    if (regcomp(&regex, HTTP_DATE_REGEX, REG_EXTENDED) == 0) {
+        return (regexec(&regex, date, 0, NULL, 0) == 0);
+    }
+    return false;
 }

@@ -20,4 +20,10 @@ void get_gmt_date_str(char* time_str, size_t time_length);
 /** This function will return an appropriate verb based on status code */
 void get_status_verb(int status_code, char* status_verb);
 
+void reset_response_object(RESPONSE* response);
+
+void reset_request_object(REQUEST* request);
+
+bool is_valid_http_date(char* date);
+
 #endif /* !UTIL_H_ */

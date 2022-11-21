@@ -28,6 +28,11 @@
 
 #define SUPPORTED_VERSION_ONLY "1.0"
 
+#define SUPPORTED_HEADER "If-Modified-Since:"
+
+/** TODO: Update the regex for weekday as well */
+#define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
 /** 
  * Status-Code  = "200"   ; OK
  *              | "201"   ; Created
@@ -72,7 +77,7 @@ typedef struct HTTP_REQUEST {
 
 /**
  * Sample HTTP Response looks like this
- * HTTP/1.1 200 OK
+ * HTTP/1.0 200 OK
  * Date: Tue, 15 Nov 1994 08:12:31 GMT
  * Server: gws
  * Last-Modified: Mon, 14 Nov 2022 00:18:42 GMT

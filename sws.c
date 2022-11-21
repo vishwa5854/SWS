@@ -45,7 +45,7 @@ int createSocket(int port) {
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 	}
-	(void)printf("Socket has port #%d\n", server.sin6_port);
+	(void)printf("Socket has port #%d\n", ntohs(server.sin6_port));
 
 	if (listen(sock, BACKLOG) < 0) {
 		perror("listening");
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     /** TODO: replace the zero here with the user specified port from the parsed args @lucas */
     int socket;
     if (flags.p_flag) {
-        socket = createSocket(atoi(flags.port_arg));
+        socket = createSocket(htons(atoi(flags.port_arg)));
     } else {
         socket = createSocket(0);
     }

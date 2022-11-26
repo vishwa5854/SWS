@@ -37,3 +37,20 @@
 25. TODO: in the URI after the request method, see if they have the hostname and shit bruh
     if the string starts with / then just do realpath if not then see if they are passing the 
     hostname or something and get the required path and use it in the real path bruh
+26. mktime for creating a time, write regex for other two types of time as well
+27. alarm SIGNAL HANDLER BABY -- for timeout
+28. For timeout try to check the RFC page for what to do
+29. timeout for connection bruh -- if there is no data output then use timeout
+30. Withing given time I should get all the request and listen no more -- also for see the size & if
+    the size is large then stop
+31. Instead of BUFSIZ use something based on the real life headers and construct it.
+32. read about dualstack program from week 09 for IPV4 & IPV6 TLDR: add a flag which will disable IPV6ONLY
+33. reasonable BACKLOG TODO: OPEN_MAX / 2 using uname
+34. do more reading for select and understand how it is handling the simultaneous connections using file_des
+35. read about pre-forking server, basically fork() before the listen call happens
+36. if -d is not specified donot output anything bruh, just handle the err gracefully and if -d is mentioned 
+    do something like fprintf(stderr, "") or perror()
+37. if the critical resources are not available then maybe the base server dies 
+38. donot daemonize for args parsing, logging file open, create a socket listen on a port
+39. ~ -> /home/vish/sws/
+ -- ~/ls.c

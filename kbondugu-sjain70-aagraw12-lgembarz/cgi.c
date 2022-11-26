@@ -148,14 +148,15 @@ int main(int argc,char **argv)// send the filename
     char* baseDirectory="/";//TODO this has to be changed in the integration
     char *tempFileName="siddharth"+'\0';
     (void)argc;//TODO Remove
-    // char *A[]={"Data","is","mine",'\0'};
 
-    
+
     locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1])+sizeof(baseDirectory)+sizeof('\0')));
     locationofexe=strcat(locationofexe,baseDirectory);
     argv[1]=argv[1]+'\0';
     locationofexe=strcat(locationofexe,argv[1]);// TODO convert to strlcat
     // printf("%s",locationofexe);//TODO Remove
+  
+    
 
    if (execute_file(locationofexe, outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1,tempFileName) < 0)   
     {

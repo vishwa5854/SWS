@@ -33,6 +33,13 @@ int createSocket(int port) {
 	server.sin6_addr = in6addr_any;
 	server.sin6_port = port;
 
+    int off = 0;
+    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off)) < 0) {
+		perror("setsockopt");
+		exit(EXIT_FAILURE);
+		/* NOTREACHED */
+	}
+
 	if (bind(sock, (struct sockaddr *)&server, sizeof(server)) != 0) {
 		perror("binding stream socket");
 		exit(EXIT_FAILURE);
@@ -138,7 +145,6 @@ int main(int argc, char **argv) {
     }
     */
 
-    /** TODO: replace the zero here with the user specified port from the parsed args @lucas */
     int socket;
     if (flags.p_flag) {
         socket = createSocket(htons(atoi(flags.port_arg)));

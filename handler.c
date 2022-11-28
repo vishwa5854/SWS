@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "util.h"
 #include "structures.h"
+#include "cgi.h"
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
@@ -48,6 +49,10 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 while (token != NULL) {
                     if (iterator <= 2) {
                         is_valid_request = is_valid_request && create_request_frame(&request, token, iterator);
+
+                        if (iterator == 1) {
+                            execute_file(token, fd);
+                        }
                     } else if (iterator > 2) {
                         /** This is a bad request brother */
                         is_valid_request = false;
@@ -61,10 +66,8 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 if (iterator < 2) {
                     is_valid_request = false;
                 }
-            }
-
-            /** We stop taking anything else from client now */
-            if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {
+            } else if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {
+                /** We stop taking anything else from client now */
                 (void)create_response_string(&response, response_string);
                 write(fd, response_string, strlen(response_string));
                 break;

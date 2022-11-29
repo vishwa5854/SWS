@@ -30,6 +30,9 @@
 
 #define SUPPORTED_HEADER "If-Modified-Since:"
 
+/** An average human with average typing speed will be able to give atleast basic headers within two minutes */
+#define TIMEOUT 120
+
 /** TODO: Update the regex for weekday as well */
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
 

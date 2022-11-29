@@ -106,7 +106,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 handleFirstLine(fd, separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
             } else if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {
                 /**
-                 * Even the timeout is done, we shouldn't close this connection as user is done with his shit 
+                 * Even when the timeout is done, we shouldn't close this connection as user is done with his shit 
                  * and we are the ones pending to serve either dir indexing, file serving or CGI execution
                 */
                 close_current_connection = false;

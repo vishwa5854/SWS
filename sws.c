@@ -80,9 +80,6 @@ int main(int argc, char **argv) {
     // Create new flags struct, initializing all flags to 0
     struct flags_struct flags = {0};
 
-    // just so we use the flags struct for now, and dont get compilation error
-    (void) flags;
-
     // defaults are to listen on all ipv4 and ipv6 addresses, and port 8080
     // use INADDR_ANY to listen for all available ips
     strncpy(flags.port_arg, "8080", 5);
@@ -123,9 +120,6 @@ int main(int argc, char **argv) {
                 return EXIT_FAILURE;
         }
     }
-    // This effectively removes flags from argc and argv.
-    argc -= optind;
-    argv += optind;
 
     
     /*
@@ -147,7 +141,12 @@ int main(int argc, char **argv) {
 
     int socket;
     if (flags.p_flag) {
-        socket = createSocket(htons(atoi(flags.port_arg)));
+        int input_int = atoi(flags.port_arg);
+        if ((input_int < 0) || (input_int > 65535)) {
+            fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", argv[0]);
+		    exit(EXIT_FAILURE);
+        }
+        socket = createSocket(htons(input_int));
     } else {
         socket = createSocket(0);
     }

@@ -1,0 +1,237 @@
+commit 24c19124e02b56c4e559470ab0566087ce5b1991
+Merge: 870c0e9 d029e11
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 14:41:10 2022 -0500
+
+    Merge pull request #4 from RealOkabe/z
+    
+    Z
+
+commit d029e117f92ed4923d7f3a099bfe28a5c590a18c
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 14:39:22 2022 -0500
+
+    Added validation for If-Modified-Since header and restructured a bunch of things
+
+commit 715b96a367ffe1a6329822a5725027c471e8cbe5
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 13:14:19 2022 -0500
+
+    Refactored few other things
+
+commit 58a0a9423f655d874371ee8d5e461bc8a3a1d138
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 13:02:27 2022 -0500
+
+    Sample responses are working
+
+commit 870c0e9f38de953c93155db02aa544a5278e6588
+Merge: 476ff1f 966b465
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sun Nov 20 18:14:50 2022 -0500
+
+    Merge pull request #3 from RealOkabe/Anmol-working-branch
+    
+    Merge readdirs and getuserdirectories
+
+commit 966b465f9746f60b81de8e97909a0672027d0451
+Merge: 2add7da 476ff1f
+Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
+Date:   Fri Nov 18 21:32:05 2022 -0500
+
+    Merge branch 'main' into Anmol-working-branch
+
+commit 99462dc6391a935a14bb3dc33b6ba0ad689fd463
+Merge: 2ee5c29 476ff1f
+Author: vish <vishwanath5854@outlook.com>
+Date:   Thu Nov 17 14:14:27 2022 -0500
+
+    Merge branch 'main' into z
+
+commit 2ee5c295730fbe0bd1e3a0913952d447f87536ff
+Merge: b5a8dc1 72b8408
+Author: vish <vishwanath5854@outlook.com>
+Date:   Thu Nov 17 14:09:37 2022 -0500
+
+    Merge branch 'z' of github.com:RealOkabe/CS631-Group-Assignment-SWS into z
+
+commit 476ff1f02fa75298449b753d76795edcd7fe9b2d
+Merge: 0cbb5e4 7305596
+Author: lgembarz <59267561+lgembarz@users.noreply.github.com>
+Date:   Wed Nov 16 17:03:15 2022 -0500
+
+    Merge pull request #2 from RealOkabe/lgembarz-working-branch
+    
+    Lgembarz working branch
+
+commit 7305596c267a27ab29677275d85936651186b6b2
+Merge: d9f4016 0cbb5e4
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Wed Nov 16 17:01:56 2022 -0500
+
+    merge conflict resolved
+
+commit 0cbb5e46aa7e3c5084cd41b0d472acfbbdfb5dbb
+Merge: 264e2eb 72b8408
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Wed Nov 16 16:43:27 2022 -0500
+
+    Merge pull request #1 from RealOkabe/z
+    
+    Z
+
+commit 72b8408aa505b889f4fa88161fbcc74e92273c6e
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Wed Nov 16 16:40:59 2022 -0500
+
+    Removed unnecessary main file
+
+commit b5a8dc11d1bb73edfcd2c811c14133fe66dca65a
+Author: vish <vishwanath5854@outlook.com>
+Date:   Wed Nov 16 16:20:05 2022 -0500
+
+    Removed unnecessary files, renamed few things
+
+commit d9f4016c38b1f72ad53615849c06e8e62cde7a34
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Wed Nov 16 11:01:41 2022 -0500
+
+    usage and args done, debug outlined
+
+commit 8d99fb43a5f7ec105362e45796b941e14e30abb1
+Author: vish <vishwanath5854@outlook.com>
+Date:   Tue Nov 15 18:02:30 2022 -0500
+
+    Added code usage
+
+commit ecf496c52c13675d8dcbed55767c01825efc5b54
+Author: vish <vishwanath5854@outlook.com>
+Date:   Tue Nov 15 17:59:03 2022 -0500
+
+    Removed few blocks that are not needed any more
+
+commit af8d20f3cf162bd7241f4d0869e36c475ffad8c0
+Author: vish <vishwanath5854@outlook.com>
+Date:   Tue Nov 15 17:47:04 2022 -0500
+
+    Integration of basic server with fork is kind of done
+
+commit bc0da4a7aa1d13195ab228c2d4722141ec97a7bf
+Author: vish <vishwanath5854@outlook.com>
+Date:   Tue Nov 15 13:18:14 2022 -0500
+
+    Questions and answers from yesterday's class
+
+commit f129b9e5aa2aa5b9832fd97b51b9423db6a17734
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 14 11:20:06 2022 -0500
+
+    Few basics are done :)
+
+commit 15f3d8deae9752a86f29ff96eb864f1c137810d2
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sun Nov 13 20:35:09 2022 -0500
+
+    Added comments for sanity
+
+commit 875fdbd8d8e748ca21c7d9636261b348f983a9e7
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sun Nov 13 20:24:38 2022 -0500
+
+    Added few structures, util functions
+
+commit 264e2eb3367da8c589243cb081e3f1e4980755f3
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Sat Nov 12 14:51:08 2022 -0500
+
+    adding the README.md
+
+commit ce019d302169507f948afafac42f872691193cb5
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Nov 12 16:08:14 2022 -0500
+
+    creating socket done
+
+commit 15b0347ee620eabdcc19ed42fc2a44be8a8df512
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Nov 12 14:20:17 2022 -0500
+
+    small bugs
+
+commit cc164798149c7eb81af40805f99b3feda7431676
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Nov 12 14:05:28 2022 -0500
+
+    starting flag parsing
+
+commit 66837d55791d007fb45a1875447598e0a850143d
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Nov 12 14:04:11 2022 -0500
+
+    init and starting flag parsing
+
+commit 2add7dab7baa11ef1353fd146a0600044428bf34
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Nov 12 03:52:53 2022 -0500
+
+    Added code to get user sws directory
+    
+    Added code to get a user name, read the contents of /home/<user>/sws directory and return them
+
+commit 33961b8c6ff909b8172ef8ed1e94680f29a0ff58
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Nov 12 03:51:41 2022 -0500
+
+    Modified readdirs for getting userdirectories
+    
+    Added a flag so that readdirs can be called only for getting directories instead of index.html
+
+commit 75a19d49e8da6a9243708ccd02381a45a3704dcd
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Fri Nov 11 12:40:02 2022 -0500
+
+    Added the header file for readdirs
+
+commit c947ec3d94113a1b6821e0a4a2b81288ae08226c
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Fri Nov 11 12:35:16 2022 -0500
+
+    Added code to return contents of index.html file
+    
+    Added code to search for index.html file in the argument directory, open, read and return the contents of the index.html file if found.
+    Added a few comments as well.
+    Changed return values to NULL in case something goes wrong
+
+commit 9cfea8008c3d73f5d6e3c6a58fe8fe5b9aaee68a
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Fri Nov 11 12:39:06 2022 +0000
+
+    Added error handling for malloc calls
+
+commit 4199eb2fb28f7efc790d7b3884176e5041404c48
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Fri Nov 11 12:30:28 2022 +0000
+
+    Added code for readdirs
+    
+    readdirs is a function that will take a directory name/path and return an array containing the names
+    of the contents of the argument.
+
+commit e921dcf4e846f03840af3a473662e0fb8a4826ac
+Merge: ce019d3 417b839
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Nov 12 16:08:25 2022 -0500
+
+    Merge branch 'main' of https://github.com/RealOkabe/CS631-Group-Assignment-SWS into main
+
+commit 417b83962ca988a642c0cc7011136c670fa75506
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Sat Nov 12 14:51:08 2022 -0500
+
+    adding the README.md
+
+commit ee50f62661e2149ebebf4c22f3b8ea9e3f118163
+Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
+Date:   Mon Nov 7 20:37:29 2022 -0500
+
+    Initial commit

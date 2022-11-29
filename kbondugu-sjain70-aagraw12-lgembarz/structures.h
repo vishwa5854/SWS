@@ -33,8 +33,6 @@
 /** TODO: Update the regex for weekday as well */
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
 
-#define HTTP_URL_REGEX "[http|https]://([a-zA-Z]+(\\.[a-zA-Z]+)+)/[A-Za-z0-9]+"
-
 /** 
  * Status-Code  = "200"   ; OK
  *              | "201"   ; Created

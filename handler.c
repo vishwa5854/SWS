@@ -1,9 +1,73 @@
 #include "handler.h"
 #include "flags.h"
+#include <signal.h>
 #include <stdbool.h>
 #include "util.h"
 #include "structures.h"
 #include "cgi.h"
+
+int current_fd;
+bool close_current_connection = true;
+
+void close_connection(int fd) {
+    /** Sending a tcp close connection message to the client */
+    (void)shutdown(fd, SHUT_RDWR);
+    (void)close(fd);
+
+    /** Lemme die peacefully :) */
+    _exit(EXIT_SUCCESS);
+}
+
+void createResponse(RESPONSE *response) {
+    (void)strncpy((*response).server, SERVER, strlen(SERVER));
+    (void)strncpy((*response).content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
+    get_gmt_date_str((*response).date, DATE_MAX_LEN);
+    (void)strncpy((*response).protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
+    (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
+    (*response).last_modified[0] = '\0';
+    (*response).content_length = 0;
+    get_status_verb((*response).status_code, (*response).status_verb);
+}
+
+void alarm_handler(int sig_num) {
+    if (close_current_connection) {
+        /** Obviously this is for testing purpose only */
+        (void)printf("Signal passed is %d\n", sig_num);
+        close_connection(current_fd);
+    }
+}
+
+void handleFirstLine(int fd, const char *separator, char *token, char *line_buffer, bool *is_first_line,
+                     bool *is_valid_request, REQUEST *request) {
+    /**
+    * 1. Split the string and set the request type, resource URI, protocol & version
+    * 2. Validate all of them and then if it's valid then continue else terminate connection
+    */
+    int iterator = 0;
+    token = strtok(line_buffer, separator);
+
+    while (token != NULL) {
+        if (iterator <= 2) {
+            (*is_valid_request) = (*is_valid_request) && create_request_frame(request, token, iterator);
+
+            /** This is for testing purpose only */
+            if (iterator == 1) {
+                execute_file(token, fd);
+            }
+        } else {
+            /** This is a bad request brother */
+            (*is_valid_request) = false;
+        }
+        iterator++;
+        token = strtok(NULL, separator);
+    }
+    (*is_first_line) = false;
+
+    /** We need minimum three tokens */
+    if (iterator < 2) {
+        (*is_valid_request) = false;
+    }
+}
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
@@ -37,37 +101,16 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         if ((client_request = read(fd, line_buffer, BUFSIZ)) < 0) {
             perror("reading stream message");
         } else if (client_request == 0) {
-            printf("Ending connection from %s.\n", rip);
+            (void)printf("Ending connection from %s.\n", rip);
         } else {
             if (is_first_line) {
-                /**
-                 * 1. Split the string and set the request type, resource URI, protocol & version
-                 * 2. Validate all of them and then if it's valid then continue else terminate connection
-                */
-               int iterator = 0;
-               token = strtok(line_buffer, separator);
-
-                while (token != NULL) {
-                    if (iterator <= 2) {
-                        is_valid_request = is_valid_request && create_request_frame(&request, token, iterator);
-
-                        if (iterator == 1) {
-                            execute_file(token, fd);
-                        }
-                    } else if (iterator > 2) {
-                        /** This is a bad request brother */
-                        is_valid_request = false;
-                    }
-                    iterator++;
-                    token = strtok(NULL, separator);
-                }
-                is_first_line = false;
-
-                /** We need minimum three tokens */
-                if (iterator < 2) {
-                    is_valid_request = false;
-                }
+                handleFirstLine(fd, separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
             } else if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {
+                /**
+                 * Even when the timeout is done, we shouldn't close this connection as user is done with his shit 
+                 * and we are the ones pending to serve either dir indexing, file serving or CGI execution
+                */
+                close_current_connection = false;
                 /** We stop taking anything else from client now */
                 (void)create_response_string(&response, response_string);
                 write(fd, response_string, strlen(response_string));
@@ -96,24 +139,12 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 response.status_code = 200;
             }
 
-            (void)strncpy(response.server, SERVER, strlen(SERVER));
-            (void)strncpy(response.content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
-            get_gmt_date_str(response.date, DATE_MAX_LEN);
-            (void)strncpy(response.protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
-            (void)strncpy(response.version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
-            response.last_modified[0] = '\0';
-            response.content_length = 0;
-            get_status_verb(response.status_code, response.status_verb);
+            createResponse(&response);
         }
     } while (client_request != 0);
 
-    /** Sending a tcp close connection message to the client */
-    (void)shutdown(fd, SHUT_RDWR);
-    (void)close(fd);
-
-    /** Lemme die peacefully :) */
-    _exit(EXIT_SUCCESS);
-    /* NOTREACHED */
+    /** Bubyeee */
+    close_connection(fd);
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
@@ -130,6 +161,9 @@ void handleSocket(int socket, struct flags_struct flags) {
         perror("accept");
         return;
     }
+    current_fd = fd;
+    signal(SIGALRM, alarm_handler);
+    alarm(TIMEOUT);
 
     if (flags.d_flag) {
         handleConnection(fd, client);
@@ -139,10 +173,7 @@ void handleSocket(int socket, struct flags_struct flags) {
     if ((pid = fork()) < 0) {
         perror("fork");
         exit(EXIT_FAILURE);
-        /* NOTREACHED */
     } else if (!pid) {
         handleConnection(fd, client);
-        /* NOTREACHED */
     }
-    /* parent silently returns */
 }

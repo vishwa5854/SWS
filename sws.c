@@ -33,6 +33,13 @@ int createSocket(int port) {
 	server.sin6_addr = in6addr_any;
 	server.sin6_port = port;
 
+    int off = 0;
+    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off)) < 0) {
+		perror("setsockopt");
+		exit(EXIT_FAILURE);
+		/* NOTREACHED */
+	}
+
 	if (bind(sock, (struct sockaddr *)&server, sizeof(server)) != 0) {
 		perror("binding stream socket");
 		exit(EXIT_FAILURE);
@@ -59,12 +66,19 @@ void printUsage(char* progName) {
     fprintf(stderr, "usage: %s [-dh] [-c dir] [-i address] [-l file] [-p port] dir\n", progName);
 }
 
-int parse_args(int argc, char **argv) {
+void reap() {
+    wait(NULL);
+}
+
+int main(int argc, char **argv) {
+    if (signal(SIGCHLD, reap) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+        /* NOTREACHED */
+    }
+
     // Create new flags struct, initializing all flags to 0
     struct flags_struct flags = {0};
-
-    // just so we use the flags struct for now, and dont get compilation error
-    (void) flags;
 
     // defaults are to listen on all ipv4 and ipv6 addresses, and port 8080
     // use INADDR_ANY to listen for all available ips
@@ -106,9 +120,6 @@ int parse_args(int argc, char **argv) {
                 return EXIT_FAILURE;
         }
     }
-    // This effectively removes flags from argc and argv.
-    argc -= optind;
-    argv += optind;
 
     
     /*
@@ -128,26 +139,18 @@ int parse_args(int argc, char **argv) {
     }
     */
 
-    // make sure to properly clean up before exiting!
-
-    return EXIT_SUCCESS;
-}
-
-void reap() {
-    wait(NULL);
-}
-
-int main(int argc, char **argv) {
-    if (signal(SIGCHLD, reap) == SIG_ERR) {
-        perror("signal");
-        exit(EXIT_FAILURE);
-        /* NOTREACHED */
+    int socket;
+    if (flags.p_flag) {
+        int input_int = atoi(flags.port_arg);
+        if ((input_int < 0) || (input_int > 65535)) {
+            fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", argv[0]);
+		    exit(EXIT_FAILURE);
+        }
+        socket = createSocket(htons(input_int));
+    } else {
+        socket = createSocket(0);
     }
-
-    parse_args(argc, argv);
-
-    /** TODO: replace the zero here with the user specified port from the parsed args @lucas */
-    int socket = createSocket(0);
+    
 
     /** This code has been referenced from CS631 APUE class notes apue-code/09 */
     while (1) {
@@ -166,7 +169,7 @@ int main(int argc, char **argv) {
         }
 
         if (FD_ISSET(socket, &ready)) {
-            handleSocket(socket);
+            handleSocket(socket, flags);
         }
     }
     

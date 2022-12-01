@@ -33,11 +33,19 @@ char** getuserdir(char* userstr) {
 		return(NULL);
 	int swsdirlen = strlen(p->pw_dir) + SWS_LEN + userstrlen - i - 1;
 	char* swsdir;
+	int userdirlen = strlen(p->pw_dir);
 	if ((swsdir = malloc(swsdirlen * sizeof(char*))) == NULL)
 		return(NULL);
-	(void) strncpy(swsdir, p->pw_dir, strlen(p->pw_dir));
+	(void) strncpy(swsdir, p->pw_dir, userdirlen);
 	(void) strncat(swsdir, "/sws/", SWS_LEN);
 	(void) strncat(swsdir, requestedContent, userstrlen - i - 1);
+	char* resolvedpath;
+	if ((resolvedpath = malloc(PATH_MAX * sizeof(char*))) == NULL)
+		return(NULL);
+	if ((realpath(swsdir, resolvedpath)) == NULL)
+		return(NULL);
+	if (strncmp(p->pw_dir, resolvedpath, userdirlen) != 0)
+		return(NULL);
 	char** dirs = readdirs(swsdir);	
 	return(dirs);
 }

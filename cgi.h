@@ -1,4 +1,6 @@
-#ifndef CGI_H
-#define CGI_H
-int     execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen, char *fileName);
+#ifndef CGI_H_
+#define CGI_H_
+
+int execute_file(const char *string, int socket_fd);
+
 #endif

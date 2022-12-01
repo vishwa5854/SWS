@@ -16,53 +16,19 @@
 // TODO check whether the file has permission to execute the file 
 // TODO check whether the files are in the same parent directory 
 
-int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int errlen,char *fileName)
+int execute_file( char *executable_path, int socket_fd)
 {
-    
-    
-    char *tempDirectory="/tmp/";
-
-    char *locationoferrtempfile;
-    int temperrfd=0;
-    char *temperrTempFile="err";//TODO check if this what is required from my side
-
-    char *locationoftempfile;
-    int tempfd=0;
-    (void)locationoftempfile;
-    
-
-    if (string == NULL) /* Is a shell available? */
-    {
-        return execute_file(":", outbuf, outlen, errbuf, errlen,fileName);
-    }
-    
-    locationoftempfile=(char *)malloc(sizeof(char)*(sizeof(tempDirectory)+sizeof(fileName)));
-    locationoftempfile=strcat(locationoftempfile,tempDirectory);
-    locationoftempfile=strcat(locationoftempfile,fileName);/* Safe file location to store buffer*/
-    printf("\n %s \n",locationoftempfile);
-
-    if ((tempfd=open(locationoftempfile, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR  ))<0){
-        perror("Could Not create the tmp file");
-        return -1;
-    }
-    
-    printf("\n%d\n",tempfd);
-
-    locationoferrtempfile=(char *)malloc(sizeof(char)*(sizeof(tempDirectory)+sizeof(temperrTempFile)+sizeof(fileName)));
-    locationoferrtempfile=strcat(locationoferrtempfile,tempDirectory);
-    locationoferrtempfile=strcat(locationoferrtempfile,temperrTempFile);
-    locationoferrtempfile=strcat(locationoferrtempfile,fileName);
-    printf("\n %s \n",locationoferrtempfile);
-
-    if ((temperrfd=open(locationoferrtempfile, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR  ))<0){
-        perror("Could Not create the tmp file");
-        return -1;
-    }
-
+    // char tempArgs;
+    // strncpy(ex)
+    // char *args[]={"/bin/sh", "sh", "-c",executable_path,NULL};
+    // for(int i=0; i<2;i++){
+    //     printf("%s",args[i]);
+    // }
     sigset_t blockMask, origMask;
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
+    char *envp={}
 
     sigemptyset(&blockMask); /* Block SIGCHLD */
     sigaddset(&blockMask, SIGCHLD);
@@ -84,19 +50,13 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
 
     case 0: /* Child: exec CGI */
         // Duplicating the file descriptors onto the write-ends of the pipes
-        if (dup2(tempfd, STDOUT_FILENO) < 0)
+        if (dup2(socket_fd, STDOUT_FILENO) < 0)
         {
             perror("Could not duplicate STDOUT file descriptor to the pipe.");
             status = -1;
             break;
         }
-        if (dup2(temperrfd, STDERR_FILENO) < 0)
-        {
-            perror("Could not duplicate STDERR file descriptor to the pipe.");
-            status = -1;
-            break;
-        }
-
+        
         /* We ignore possible error returns because the only specified error
            is for a failed exec(), and because errors in these calls can't
            affect the caller of command() (which is a separate process) */
@@ -111,8 +71,16 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
             sigaction(SIGQUIT, &saDefault, NULL);
 
         sigprocmask(SIG_SETMASK, &origMask, NULL);
-
-        execl("/bin/sh", "sh", "-c", string, (char *)NULL);
+        char *args[] = {"0", NULL};	/* each element represents a command line argument */
+        char *env[] = { NULL };	/* leave the environment list null */
+     
+        (void)args;
+        (void)env;
+        // execve("/bin/ls", args, env);
+        // execl("/bin/sh", "sh", "-c", executable_path, (char *)NULL);
+        (void)executable_path;
+        execve(executable_path,args,env);
+        printf("Execve() Not able to run this");
         _exit(127); /* We could not exec the shell */
 
     default: /* Parent: wait for our child to terminate */
@@ -138,37 +106,4 @@ int execute_file(const char *string, char *outbuf, int outlen, char *errbuf, int
     errno = savedErrno;
 
     return status;
-}
-
-/* main function to test out the functionality using ls, TODO: this will not be used in final, it will be integrated with SWS */
-int main(int argc,char **argv)// send the filename 
-{
-    char outbuf[BUFFER_SIZE], errbuf[BUFFER_SIZE];
-    char *locationofexe;
-    char* baseDirectory="/";//TODO this has to be changed in the integration
-    char *tempFileName="siddharth"+'\0';
-    (void)argc;//TODO Remove
-    // char *A[]={"Data","is","mine",'\0'};
-
-    
-    locationofexe=(char *)malloc(sizeof(char)*(sizeof(argv[1])+sizeof(baseDirectory)+sizeof('\0')));
-    locationofexe=strcat(locationofexe,baseDirectory);
-    argv[1]=argv[1]+'\0';
-    locationofexe=strcat(locationofexe,argv[1]);// TODO convert to strlcat
-    // printf("%s",locationofexe);//TODO Remove
-
-   if (execute_file(locationofexe, outbuf, BUFFER_SIZE - 1, errbuf, BUFFER_SIZE - 1,tempFileName) < 0)   
-    {
-        perror("command function failed.");
-        return -1;
-    }
-    
-
-    outbuf[BUFFER_SIZE - 1] = '\0';
-    errbuf[BUFFER_SIZE - 1] = '\0';
-
-    // printf("Got stdout: \n%s", outbuf);
-    // printf("Got stderr: \n%s", errbuf);
-
-    return 0;
 }

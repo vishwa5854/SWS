@@ -1,5 +1,5 @@
 PROG=	sws
-OBJS=	util.o readdirs.o sws.o handler.o
+OBJS=	util.o readdirs.o sws.o handler.o cgi.o
 CFLAGS=	-Wall -Werror -Wextra -g
 
 all: ${PROG}

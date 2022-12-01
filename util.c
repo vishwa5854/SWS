@@ -5,6 +5,7 @@
 #include <strings.h>
 #include <time.h>
 #include "util.h"
+#include "cgi.h"
 
 /** 
  * This is util function which will generate current time like
@@ -18,6 +19,15 @@ void get_gmt_date_str(char* time_str, size_t time_length) {
     if (strftime(time_str, time_length, "%a, %d %b %Y %H:%M:%S %Z", &tm) <= 0) {
         perror("Error while getting GMT timestamp");
     }
+}
+
+bool is_valid(char* str, char* regex_comparator) {
+    regex_t regex;
+
+    if (regcomp(&regex, regex_comparator, REG_EXTENDED) == 0) {
+        return (regexec(&regex, str, 0, NULL, 0) == 0);
+    }
+    return false;
 }
 
 /** TODO: Instead of taking a string, just take the filedescriptor and write to the stream instead :) */
@@ -135,6 +145,8 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         case 1:
             /** TODO: */
+            printf("%d\n", is_valid(token, HTTP_URL_REGEX));
+            
             return valid;
             // URI validation
             break;
@@ -159,7 +171,7 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         /** Not to confuse with token#4 instead used for If-Modified-Since header. */
         case 3:
-            valid = is_valid_http_date(token);
+            valid = is_valid(token, HTTP_DATE_REGEX);
             if (valid) {
                 (void)strncpy(request->if_modified_since, token, strlen(token));
             }
@@ -188,11 +200,10 @@ void reset_request_object(REQUEST* request) {
     bzero(request->version, sizeof(request->version));
 }
 
-bool is_valid_http_date(char* date) {
-    regex_t regex;
-
-    if (regcomp(&regex, HTTP_DATE_REGEX, REG_EXTENDED) == 0) {
-        return (regexec(&regex, date, 0, NULL, 0) == 0);
-    }
-    return false;
-}
+// bool validate_URL(char* URL) {
+    /**
+     * 1. http[s]://chutiyapa/--this is what we need
+     * 2. Direct path /../../../
+     * 3. Starts with / */
+    
+// }

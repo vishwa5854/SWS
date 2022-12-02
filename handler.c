@@ -1,6 +1,7 @@
 #include "handler.h"
 #include <signal.h>
 #include <stdbool.h>
+#include <string.h>
 #include "util.h"
 #include "structures.h"
 #include "cgi.h"
@@ -51,7 +52,8 @@ void handleFirstLine(int fd, const char *separator, char *token, char *line_buff
 
             /** This is for testing purpose only */
             if (iterator == 1) {
-                execute_file(token, fd);
+                (void)fd;
+                // execute_file(token, fd);
             }
         } else {
             /** This is a bad request brother */
@@ -71,7 +73,6 @@ void handleFirstLine(int fd, const char *separator, char *token, char *line_buff
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
     const char *rip;
-    int client_request;
     char claddr[INET6_ADDRSTRLEN];
 
     if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
@@ -93,54 +94,94 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     reset_request_object(&request);
     reset_response_object(&response);
 
-    do {
-        char line_buffer[BUFSIZ];
+    int number_of_headers = 0;
+    char line_buffer_chars[1];
+    bool last_char_was_next_line = false;
+    bool input_done = false;
+    bool end_of_request = false;
+
+    while (number_of_headers < MAX_NUMBER_OF_HEADERS) {
+        int cursor = 0;
+        char line_buffer[SUPPORTED_MAX_HEADER_SIZE + 1];
         bzero(line_buffer, sizeof(line_buffer));
 
-        if ((client_request = read(fd, line_buffer, BUFSIZ)) < 0) {
-            perror("reading stream message");
-        } else if (client_request == 0) {
-            (void)printf("Ending connection from %s.\n", rip);
-        } else {
-            if (is_first_line) {
-                handleFirstLine(fd, separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
-            } else if (strncmp(line_buffer, "\r\n", strlen("\r\n")) == 0) {
-                /**
-                 * Even when the timeout is done, we shouldn't close this connection as user is done with his shit 
-                 * and we are the ones pending to serve either dir indexing, file serving or CGI execution
-                */
-                close_current_connection = false;
-                /** We stop taking anything else from client now */
-                (void)create_response_string(&response, response_string);
-                write(fd, response_string, strlen(response_string));
+        while (cursor < SUPPORTED_MAX_HEADER_SIZE) {
+            if (read(fd, line_buffer_chars, 1) <= 0) {
+                input_done = true;
+                break;
+            }
+
+            if (strncmp(line_buffer_chars, "\n", 1) == 0) {
+                if (last_char_was_next_line) {
+                    /** This is the end of the request. */
+                    end_of_request = true;
+                }
+                last_char_was_next_line = true;
                 break;
             } else {
-                /** Reading the headers we don't validate or care about anything else except for If-Modified-Since */
-                token = strtok(line_buffer, separator);
-
-                if (
-                    (strlen(token) == strlen(SUPPORTED_HEADER)) &&
-                    (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)
-                ) {
-                    token = strtok(NULL, "");
-                    is_valid_request = is_valid_request && create_request_frame(&request, token, 3);
-                } else {
-                    continue;
+                if (strncmp(line_buffer_chars, "\r", 1) != 0) {
+                    last_char_was_next_line = false;
+                    line_buffer[cursor] = line_buffer_chars[0];
+                    cursor++;
                 }
             }
-            printf("Client (%s) sent: %s", rip, line_buffer);
 
-            /** Assigning status codes will be revisited. */
-            if (!is_valid_request) {
-                response.status_code = 400;
-                /** We shouldn't terminate the request we have to wait until the user is done */
-            } else {
-                response.status_code = 200;
+            /** Client has given a header that is greater than the size we accept. */
+            if (cursor == SUPPORTED_MAX_HEADER_SIZE) {
+                is_valid_request = false;
             }
-
-            createResponse(&response);
         }
-    } while (client_request != 0);
+        line_buffer[cursor + 1] = '\0';
+        number_of_headers++;
+
+        if (end_of_request) {
+            break;
+        }
+
+        if (number_of_headers == 1) {
+           handleFirstLine(fd, separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
+        } else {
+            /** Reading the headers we don't validate or care about anything else except for If-Modified-Since */
+           token = strtok(line_buffer, separator);
+
+           if (
+                (strlen(token) == strlen(SUPPORTED_HEADER)) &&
+                (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)
+            ) {
+               token = strtok(NULL, "");
+               is_valid_request = is_valid_request && create_request_frame(&request, token, 3);
+           } else {
+               continue;
+           }
+        }
+
+        if (input_done) {
+            break;
+        }
+
+        /** The client has clearly crossed the allowed number of headers. */
+        if (number_of_headers == MAX_NUMBER_OF_HEADERS) {
+            is_valid_request = false;
+        }
+    }
+
+    /** Assigning status codes will be revisited. */
+    if (!is_valid_request) {
+        response.status_code = 400;
+        /** We shouldn't terminate the request we have to wait until the user is done */
+    } else {
+        response.status_code = 200;
+    }
+
+    createResponse(&response);
+    /**
+     * Even when the timeout is done, we shouldn't close this connection as user is done with his shit 
+     * and we are the ones pending to serve either dir indexing, file serving or CGI execution
+    */
+    close_current_connection = false;
+    /** We stop taking anything else from client now */
+    (void)create_response_string(&response, response_string);
+    write(fd, response_string, strlen(response_string));
 
     /** Bubyeee */
     close_connection(fd);
@@ -160,14 +201,14 @@ void handleSocket(int socket) {
         perror("accept");
         return;
     }
-    current_fd = fd;
-    signal(SIGALRM, alarm_handler);
-    alarm(TIMEOUT);
 
     if ((pid = fork()) < 0) {
         perror("fork");
         exit(EXIT_FAILURE);
     } else if (!pid) {
+        current_fd = fd;
+        signal(SIGALRM, alarm_handler);
+        alarm(TIMEOUT);
         handleConnection(fd, client);
     }
 }

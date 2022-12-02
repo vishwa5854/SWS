@@ -30,10 +30,34 @@
 
 #define SUPPORTED_HEADER "If-Modified-Since:"
 
+/** 
+ * After looking at several HTTP requests I saw a lot of the have cookies in their headers, auth tokens in their headers
+ * and most of the times the cookies are really large in size and 16K should be good enough size for the entire payload
+ * if you consider 1K for each header, we can take 16 different headers or atleast 15 headers which are more than enoguh
+ * for us.
+ * These are the sample request headers that user might send and we have space for accomodating all of them
+ * * GET /home.html HTTP/1.1
+ * Host: developer.mozilla.org
+ * User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
+ * Accept: text/html,application/xhtml+xml,application/xml;q=0.9,**;q=0.8
+ * Accept-Language: en-US,en;q=0.5
+ * Accept-Encoding: gzip, deflate, br
+ * Referer: https://developer.mozilla.org/testpage.html
+ * Connection: keep-alive
+ * Upgrade-Insecure-Requests: 1
+ * If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT
+ * If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
+ * Cache-Control: max-age=0
+*/
+#define SUPPORTED_MAX_HEADER_SIZE 8192
+
+/** For a given request we will only support 100 headers as per request this could be the maximum number of headers passed */
+#define MAX_NUMBER_OF_HEADERS 100
+
 /** An average human with average typing speed will be able to give atleast basic headers within two minutes */
 #define TIMEOUT 120
 
-/** TODO: Update the regex for weekday as well */
+/** TODO: Update the regex for two other formats mentioned in the RFC */
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
 
 #define HTTP_URL_REGEX "[http|https]://([a-zA-Z]+(\\.[a-zA-Z]+)+)/[A-Za-z0-9]+"
@@ -78,6 +102,7 @@ typedef struct HTTP_REQUEST {
     char protocol[PROTOCOL_MAX_LEN];
     char version[PROTOCOL_VERSION_MAX_LEN];
     char if_modified_since[DATE_MAX_LEN];
+    int time_request_made;
 } REQUEST;
 
 /**

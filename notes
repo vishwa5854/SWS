@@ -1,0 +1,3 @@
+1. We are going to support upto 64 headers, we are not limiting individually but we are limiting by the entire size
+of the payload.
+2. Each header length is 8K so we declare the header size as 64 * 8K

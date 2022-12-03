@@ -32,9 +32,7 @@
 
 /** 
  * After looking at several HTTP requests I saw a lot of the have cookies in their headers, auth tokens in their headers
- * and most of the times the cookies are really large in size and 16K should be good enough size for the entire payload
- * if you consider 1K for each header, we can take 16 different headers or atleast 15 headers which are more than enoguh
- * for us.
+ * and most of the times the cookies are really large in size and 8K should be good enough size for one header
  * These are the sample request headers that user might send and we have space for accomodating all of them
  * * GET /home.html HTTP/1.1
  * Host: developer.mozilla.org
@@ -51,7 +49,7 @@
 */
 #define SUPPORTED_MAX_HEADER_SIZE 8192
 
-/** For a given request we will only support 100 headers as per request this could be the maximum number of headers passed */
+/** For a given request we will only support 100 headers as per request, since IRL there are no HTTP requests with more than 100 headers */
 #define MAX_NUMBER_OF_HEADERS 100
 
 /** An average human with average typing speed will be able to give atleast basic headers within two minutes */

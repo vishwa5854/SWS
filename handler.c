@@ -77,7 +77,6 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
 
     if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
         perror("inet_ntop");
-        rip = "unknown";
     } else {
         (void)printf("Client connection from %s!\n", rip);
     }
@@ -88,6 +87,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     bool is_valid_request = true;
     REQUEST request;
     RESPONSE response;
+    response.status_code = 0;
     char response_string[BUFSIZ];
     bzero(response_string, sizeof(response_string));
     
@@ -97,17 +97,17 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     int number_of_headers = 0;
     char line_buffer_chars[1];
     bool last_char_was_next_line = false;
-    bool input_done = false;
+    bool stream_done = false;
     bool end_of_request = false;
-
-    while (number_of_headers < MAX_NUMBER_OF_HEADERS) {
+    
+    while (!stream_done) {
         int cursor = 0;
         char line_buffer[SUPPORTED_MAX_HEADER_SIZE + 1];
         bzero(line_buffer, sizeof(line_buffer));
 
-        while (cursor < SUPPORTED_MAX_HEADER_SIZE) {
+        while (true) {
             if (read(fd, line_buffer_chars, 1) <= 0) {
-                input_done = true;
+                stream_done = true;
                 break;
             }
 
@@ -127,12 +127,20 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
             }
 
             /** Client has given a header that is greater than the size we accept. */
-            if (cursor == SUPPORTED_MAX_HEADER_SIZE) {
-                is_valid_request = false;
+            if (cursor >= SUPPORTED_MAX_HEADER_SIZE) {
+                end_of_request = true;
+                response.status_code = 413;
+                break;
             }
         }
         line_buffer[cursor + 1] = '\0';
         number_of_headers++;
+
+        if (number_of_headers >= MAX_NUMBER_OF_HEADERS) {
+            end_of_request = true;
+            response.status_code = 413;
+            break;
+        }
 
         if (end_of_request) {
             break;
@@ -154,23 +162,16 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                continue;
            }
         }
-
-        if (input_done) {
-            break;
-        }
-
-        /** The client has clearly crossed the allowed number of headers. */
-        if (number_of_headers == MAX_NUMBER_OF_HEADERS) {
-            is_valid_request = false;
-        }
     }
 
     /** Assigning status codes will be revisited. */
-    if (!is_valid_request) {
-        response.status_code = 400;
-        /** We shouldn't terminate the request we have to wait until the user is done */
-    } else {
-        response.status_code = 200;
+    if (response.status_code == 0) {
+        if (!is_valid_request) {
+            response.status_code = 400;
+            /** We shouldn't terminate the request we have to wait until the user is done */
+        } else {
+            response.status_code = 200;
+        }
     }
 
     createResponse(&response);

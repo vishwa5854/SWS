@@ -9,7 +9,7 @@
 
 int writelog(char* filename, struct HTTP_REQUEST request, struct HTTP_RESPONSE response, char* requestip) {
 	FILE* fp;
-	if ((fp = fopen(filename, "w")) == NULL)
+	if ((fp = fopen(filename, "a")) == NULL)
 		return(-1);
 	char* writedata;
 	if ((writedata = malloc(PATH_MAX * sizeof(char*))) == NULL)

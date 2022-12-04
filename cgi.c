@@ -16,7 +16,7 @@
 // TODO check whether the file has permission to execute the file 
 // TODO check whether the files are in the same parent directory 
 
-int execute_file( char *executable_path, int socket_fd)
+int execute_file(const char *executable_path, int socket_fd)
 {
     // char tempArgs;
     // strncpy(ex)
@@ -28,8 +28,8 @@ int execute_file( char *executable_path, int socket_fd)
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
-    char *envp={}
-
+    char *envp[]={"QUERY_STRING=ABCD",0};
+    int errno;
     sigemptyset(&blockMask); /* Block SIGCHLD */
     sigaddset(&blockMask, SIGCHLD);
     sigprocmask(SIG_BLOCK, &blockMask, &origMask);
@@ -76,11 +76,30 @@ int execute_file( char *executable_path, int socket_fd)
      
         (void)args;
         (void)env;
+     
         // execve("/bin/ls", args, env);
         // execl("/bin/sh", "sh", "-c", executable_path, (char *)NULL);
-        (void)executable_path;
-        execve(executable_path,args,env);
+        // printf("\n%d\n",errno);
+        // execve(executable_path,args,envp);//Working
+
+        if (execve(executable_path,args,envp)==-1){
+            printf("Execve() Not able to run this");
+           
+        }
+        printf("\n%d\n",errno);
+        fprintf(stderr, "Value of errno: %d\n", errno);
+
+
+
+        // if (execve(executable_path,(char *const*)NULL,envp)==-1){
+        //     printf("Execve() Not able to run this");
+           
+        // }
+        // printf("\n%d\n",errno);
+        // fprintf(stderr, "Value of errno: %d\n", errno);
+
         printf("Execve() Not able to run this");
+
         _exit(127); /* We could not exec the shell */
 
     default: /* Parent: wait for our child to terminate */

@@ -71,6 +71,27 @@ void handleFirstLine(int fd, const char *separator, char *token, char *line_buff
     }
 }
 
+/** Make sure to set the status_code and content length before calling this function :) */
+void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *response_string) {
+    if ((*response).status_code == 0) {
+        if (!is_valid_request) {
+            (*response).status_code = 400;
+        } else {
+            (*response).status_code = 200;
+        }
+    }
+
+    createResponse(response);
+    /**
+     * Even when the timeout is done, we shouldn't close this connection as user is done with his shit
+     * and we are the ones pending to serve either dir indexing, file serving or CGI execution
+    */
+    close_current_connection = false;
+    /** We stop taking anything else from client now */
+    (void)create_response_string(response, response_string);
+    write(fd, response_string, strlen(response_string));
+}
+
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client) {
     const char *rip;
@@ -165,25 +186,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         }
     }
 
-    /** Assigning status codes will be revisited. */
-    if (response.status_code == 0) {
-        if (!is_valid_request) {
-            response.status_code = 400;
-            /** We shouldn't terminate the request we have to wait until the user is done */
-        } else {
-            response.status_code = 200;
-        }
-    }
-
-    createResponse(&response);
-    /**
-     * Even when the timeout is done, we shouldn't close this connection as user is done with his shit 
-     * and we are the ones pending to serve either dir indexing, file serving or CGI execution
-    */
-    close_current_connection = false;
-    /** We stop taking anything else from client now */
-    (void)create_response_string(&response, response_string);
-    write(fd, response_string, strlen(response_string));
+    send_headers(fd, is_valid_request, &response, response_string);
 
     /** Bubyeee */
     close_connection(fd);

@@ -15,7 +15,7 @@
 #include "structures.h"
 
 void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
-              char* response_string) {
+              char* response_string, bool flag) {
     char path[PATH_MAX];
 
     if (realpath(dirname, path) == NULL) {
@@ -24,7 +24,7 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
     }
     char cwd[PATH_MAX];
     
-	if (getcwd(cwd, sizeof(cwd)) == NULL) {
+	if (getcwd(cwd, sizeof(cwd)) == NULL && flag) {
         send_error(500, fd, is_valid_request, response, response_string);
         return;
     }

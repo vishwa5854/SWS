@@ -12,7 +12,7 @@
 
 #include "readdirs.h"
 
-void getuserdir(char* userstr) {
+void getuserdir(char* userstr, int fd) {
 	int userstrlen = strlen(userstr);
 	char* username;
 	char* requestedContent;
@@ -46,6 +46,5 @@ void getuserdir(char* userstr) {
 		return(NULL);
 	if (strncmp(p->pw_dir, resolvedpath, userdirlen) != 0)
 		return(NULL);
-	char** dirs = readdirs(swsdir);	
-	return(dirs);
+	readdirs(swsdir, fd);
 }

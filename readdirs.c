@@ -30,7 +30,7 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
     }
     
 	/* Lock user in the current working directory */
-    if (strncmp(path, cwd, strlen(cwd)) != 0) {
+    if (strncmp(path, cwd, strlen(cwd)) != 0 && flag) {
         send_error(401, fd, is_valid_request, response, response_string);
         return;
     }

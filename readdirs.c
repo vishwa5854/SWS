@@ -1,6 +1,7 @@
 #define INDEX_SIZE	12
 
 #include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -11,8 +12,11 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
+#include <structures.h>
+#include <handler.h>
+
 /* Take socket file descriptor as input */
-void readdirs(char* dirname, int fd) {
+void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE *response, char *response_string) {
 	char path[PATH_MAX];
 	if (realpath(dirname, path) == NULL) {
 		return(NULL);

@@ -12,7 +12,7 @@
 
 #include "readdirs.h"
 
-char** getuserdir(char* userstr) {
+void getuserdir(char* userstr) {
 	int userstrlen = strlen(userstr);
 	char* username;
 	char* requestedContent;

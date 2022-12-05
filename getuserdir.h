@@ -1,6 +1,6 @@
 #ifndef GETUSERDIR
 #define GETUSERDIR_H
 
-char** getuserdir(char* username);
+void getuserdir(char* username);
 
 #endif /* GETUSERDIR_H */

@@ -11,7 +11,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-char** readdirs(char* dirname) {
+void readdirs(char* dirname) {
 	char path[PATH_MAX];
 	if (realpath(dirname, path) == NULL) {
 		return(NULL);

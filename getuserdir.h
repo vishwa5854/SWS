@@ -1,6 +1,9 @@
 #ifndef GETUSERDIR
 #define GETUSERDIR_H
 
-void getuserdir(char* username, int fd);
+#include <stdbool.h>
+#include "structures.h"
+
+void getuserdir(char* username, int fd, bool is_valid_request, RESPONSE *response, char *response_string);
 
 #endif /* GETUSERDIR_H */

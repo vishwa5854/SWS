@@ -2,6 +2,7 @@
 #define SWS_LEN 5
 
 #include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -10,9 +11,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "handler.h"
 #include "readdirs.h"
+#include "structures.h"
 
-void getuserdir(char* userstr, int fd) {
+void getuserdir(char* userstr, int fd, bool is_valid_request, RESPONSE *response, char *response_string) {
 	int userstrlen = strlen(userstr);
 	char* username;
 	char* requestedContent;

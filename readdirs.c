@@ -36,8 +36,6 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
     }
     DIR* dir;
     struct dirent* dirp;
-
-    int count = 0;
     int dirlen = strlen(dirname);
     char indexfile[dirlen + INDEX_SIZE];
     /* Doing a +1 for termination with \0*/

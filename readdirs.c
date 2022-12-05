@@ -11,7 +11,8 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-void readdirs(char* dirname) {
+/* Take socket file descriptor as input */
+void readdirs(char* dirname, int fd) {
 	char path[PATH_MAX];
 	if (realpath(dirname, path) == NULL) {
 		return(NULL);
@@ -90,5 +91,15 @@ void readdirs(char* dirname) {
 			}
 		}
 	}
-	return(dirs);
+	FILE* fp;
+	if ((fp = fdopen(fd, "a")) == NULL) {
+		return(NULL);
+	}
+	int count = 0;
+	while(dirs[count] != NULL) {
+		if (fprintf(fp, dirs[count]) == -1) {
+			return(NULL);
+		}
+		count++;
+	}
 }

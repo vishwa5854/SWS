@@ -42,6 +42,15 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
             break;
         }
     }
+    /* Doing this for the case when the request only contains a username without / */
+    if (strlen(username) == 0 && userstrlen != 0) {
+	    if ((username = malloc(userstrlen * sizeof(char*))) == NULL) {
+		    send_error(500, fd, is_valid_request, response, response_string);
+		    return;
+	    }
+	    (void)strncpy(username, userstr, userstrlen);
+    }
+
     struct passwd* p;
 
     if ((p = getpwnam(username)) == NULL) {
@@ -75,5 +84,5 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
         send_error(401, fd, is_valid_request, response, response_string);
         return;
     }
-    readdirs(swsdir, fd, is_valid_request, response, response_string);
+    readdirs(swsdir, fd, is_valid_request, response, response_string, false);
 }

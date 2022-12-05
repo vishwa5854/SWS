@@ -106,6 +106,9 @@ void get_status_verb(int status_code, char* status_verb) {
         case 404:
             (void)sprintf(status_verb, "Not Found");
             break;
+        case 413:
+            (void)sprintf(status_verb, "Payload Too Large");
+            break;
         case 500:
             (void)sprintf(status_verb, "Internal Server Error");
             break;

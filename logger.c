@@ -7,9 +7,9 @@
 #include "logger.h"
 #include "structures.h"
 
-int writelog(char* filename, struct HTTP_REQUEST request, struct HTTP_RESPONSE response, char* requestip) {
+int writelog(int fd, struct HTTP_REQUEST request, struct HTTP_RESPONSE response, char* requestip) {
 	FILE* fp;
-	if ((fp = fopen(filename, "a")) == NULL)
+	if ((fp = fdopen(fd, "a")) == NULL)
 		return(-1);
 	char* writedata;
 	if ((writedata = malloc(PATH_MAX * sizeof(char*))) == NULL)

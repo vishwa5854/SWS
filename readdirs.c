@@ -85,10 +85,4 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
             }
         }
     }
-    FILE* fp;
-    
-	if ((fp = fdopen(fd, "a")) == NULL) {
-        send_error(500, fd, is_valid_request, response, response_string);
-    }
-    count = 0;
 }

@@ -98,8 +98,8 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *respo
 }
 
 
-void internal_server_error(int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string) {
-    response->status_code = 500;
+void send_error(int status_code, int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string) {
+    response->status_code = status_code;
 
     send_headers(socket_fd, is_valid_request, response, response_string);
 

@@ -46,7 +46,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
     /** Creation of pipe failed, so Internal Server Error 500 */
     if (pipe(fd_out) < 0) {
-        internal_server_error(socket_fd, is_valid_request, response, response_string);
+        send_error(500, socket_fd, is_valid_request, response, response_string);
         return EXIT_FAILURE;
     }
 
@@ -56,7 +56,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             status = -1;
             perror("Could not create child process (fork() failed).");
 
-            internal_server_error(socket_fd, is_valid_request, response, response_string);
+            send_error(500, socket_fd, is_valid_request, response, response_string);
             break; /* Carry on to reset signal attributes */
 
         case 0: /* Child: exec CGI */
@@ -76,7 +76,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             (void)close(fd_out[0]);
 
             if (dup2(fd_out[1], STDOUT_FILENO) != STDOUT_FILENO) {
-                internal_server_error(socket_fd, is_valid_request, response, response_string);
+                send_error(500, socket_fd, is_valid_request, response, response_string);
                 break;
             }
 
@@ -105,7 +105,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
             if (execve(executable_path, args, envp) == -1) {
                 printf("Execve() Not able to run this");
-                internal_server_error(socket_fd, is_valid_request, response, response_string);
+                send_error(500, socket_fd, is_valid_request, response, response_string);
             }
 
             puts("Below the execve call");
@@ -155,7 +155,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
                     close_connection(socket_fd);
                 } else {
                     /** CGI program failed, send error response */
-                    internal_server_error(socket_fd, is_valid_request, response, response_string);
+                    send_error(500, socket_fd, is_valid_request, response, response_string);
                 }
             } else {
                 /** CGI program has not terminated, read remaining data from the pipe */

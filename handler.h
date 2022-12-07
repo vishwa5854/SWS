@@ -17,7 +17,7 @@ void handleSocket(int socket, struct flags_struct);
 
 void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *response_string);
 
-void internal_server_error(int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string);
+void send_error(int status_code, int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string);
 
 void close_connection(int fd);
 

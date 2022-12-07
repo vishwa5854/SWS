@@ -150,6 +150,39 @@ int main(int argc, char **argv) {
     } else {
         socket = createSocket(0);
     }
+
+    if (flags.d_flag) {
+        // logging already to stdout
+        // not yet daemonized
+        printf("-d flag detected!\n");
+
+        fd_set ready;
+        struct timeval to;
+        FD_ZERO(&ready);
+        FD_SET(socket, &ready);
+        to.tv_sec = SLEEP_FOR;
+        to.tv_usec = 0;
+
+        if (select(socket + 1, &ready, 0, 0, &to) < 0) {
+            if (errno != EINTR) {
+                perror("select");
+            }
+            //continue;
+        }
+
+        if (FD_ISSET(socket, &ready)) {
+            handleSocket(socket, flags);
+        }
+        
+        return EXIT_SUCCESS;
+   } else {
+        int daemon_ret;
+        if ((daemon_ret = daemon(0, 0)) == -1){
+            perror("creating daemon");
+		    return EXIT_FAILURE;
+        }
+        // our process is now a daemon.
+   }
     
 
     /** This code has been referenced from CS631 APUE class notes apue-code/09 */

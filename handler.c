@@ -34,6 +34,7 @@ void alarm_handler(int sig_num) {
     if (close_current_connection) {
         /** Obviously this is for testing purpose only */
         (void)printf("Signal passed is %d\n", sig_num);
+        // TODO: Send the time out as response and status code 408
         close_connection(current_fd);
     }
 }
@@ -45,17 +46,18 @@ void handleFirstLine(int fd, const char *separator, char *token, char *line_buff
     * 2. Validate all of them and then if it's valid then continue else terminate connection
     */
     int iterator = 0;
+    (void)fd;
     token = strtok(line_buffer, separator);
 
     while (token != NULL) {
         if (iterator <= 2) {
             (*is_valid_request) = (*is_valid_request) && create_request_frame(request, token, iterator);
 
-            /** This is for testing purpose only */
-            if (iterator == 1) {
-                (void)fd;
-                // execute_file(token, fd);
-            }
+            /** TODO: Get this shit removed. This is for testing purpose only */
+            // if (iterator == 1) {
+            //     (void)fd;
+            //     execute_file(token, fd, );
+            // }
         } else {
             /** This is a bad request brother */
             (*is_valid_request) = false;
@@ -89,7 +91,23 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *respo
     close_current_connection = false;
     /** We stop taking anything else from client now */
     (void)create_response_string(response, response_string);
-    write(fd, response_string, strlen(response_string));
+    (void)write(fd, response_string, strlen(response_string));
+    
+    /** Sending End of Headers */
+    (void)write(fd, "\r\n", strlen("\r\n"));
+}
+
+
+void internal_server_error(int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string) {
+    response->status_code = 500;
+
+    send_headers(socket_fd, is_valid_request, response, response_string);
+
+    /** Sending the error again because clients like browsers will just show empty page on error if we don't. */
+    (void)write(socket_fd, response->status_verb, strlen(response->status_verb));
+    (void)write(socket_fd, "\r\n", strlen("\r\n"));
+
+    close_connection(socket_fd);
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
@@ -186,10 +204,13 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         }
     }
 
-    send_headers(fd, is_valid_request, &response, response_string);
+    /** Testing for now, calling the CGI bruh */
+    execute_file(request.path, fd, is_valid_request, &response, response_string);
 
-    /** Bubyeee */
-    close_connection(fd);
+//    send_headers(fd, is_valid_request, &response, response_string);
+//
+//    /** Bubyeee */
+//    close_connection(fd);
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */

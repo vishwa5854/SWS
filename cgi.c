@@ -22,21 +22,43 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     char temp_buff[BUFSIZ];
     int fd_out[2];
     int n_chars = 0;
-    //testing code
-    printf("%s",executable_path);
+    
+    const char* Query_String="QUERY_STRING=";
+    const char* combined_query_string;
+    const char* executable_path_after_strtok;
+    const char* parameters;
 
-    // const char delimeter[4]="?";
+    executable_path_after_strtok=strtok((char *)executable_path,"?");
+    
+    parameters=strtok(NULL,"?");
+    
+    if (parameters == NULL)
+    {
+        parameters="";
+        if((combined_query_string = malloc(strlen(Query_String) * sizeof(char)))==NULL){
+            send_error(500, socket_fd, is_valid_request, response, response_string);
+        }
+        combined_query_string = strncpy((char * restrict)combined_query_string, (char * restrict)Query_String,strlen(Query_String));
+    }
+    else{
+         if ((combined_query_string=malloc(sizeof(char)*(strlen(Query_String)+strlen(parameters))))==NULL){
+            send_error(500, socket_fd, is_valid_request, response, response_string);
+        }
+        strncpy((char * restrict)combined_query_string,(char * restrict)Query_String,strlen(Query_String));//TODO check for return values on the same
+        strlcat((char * restrict)combined_query_string,(char * restrict)parameters,strlen(parameters)+strlen(combined_query_string)+1);//Rough POC//TODO check for return values on the same
+    }
+    char *envp[]={(char *)combined_query_string,0};
 
-    // char *tok;
-    // tok=strtok((char * restrict)executable_path,delimeter);
-    // while(tok!=NULL){
-    //     printf("\n%d - ",count);
-    //     printf("%s \n ",tok);
-    //     tok = strtok(NULL, "?");
-    // }
-    // const char* Query_String="QUERY_STRING=";
-    const char* executable_path_after_strtok=strtok((char *)executable_path,"?");
-    const char* parameters=strtok(NULL,"?");
+    free((void *)combined_query_string);
+    
+    /* Check if file exsists and has executable permission with the respective error codes*/
+    if(access(executable_path_after_strtok,F_OK)==-1){
+        send_error(404, socket_fd, is_valid_request, response, response_string);
+    }
+    if(access(executable_path_after_strtok,X_OK)){
+        send_error(401, socket_fd, is_valid_request, response, response_string);
+    }
+    
     //end testing code
 
     // char tempArgs;
@@ -45,24 +67,17 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     // for(int i=0; i<2;i++){
     //     printf("%s",args[i]);
     // }
+
     sigset_t blockMask, origMask;
+    // int flag=0;
+
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
     /* Code for enviornment variable assigning*/
-    const char* Query_String="QUERY_STRING=";
-    const char* combined_query_string;
-    if ((combined_query_string=malloc(sizeof(char *)*(strlen(Query_String)+strlen(parameters))))==NULL){
-        send_error(500, socket_fd, is_valid_request, response, response_string);
-    }
-    strncpy((char * restrict)combined_query_string,(char * restrict)Query_String,strlen(Query_String));//TODO change to strncpy
-    strlcat((char * restrict)combined_query_string,(char * restrict)parameters,strlen(parameters)+strlen(combined_query_string)+1);//Rough POC
-    (void)executable_path_after_strtok;//TODO remove
-    char *envp[]={(char *)combined_query_string,0};
+
     int errno;
-    free((void *)combined_query_string);
-    // strncat(envp[0],tok[1],strlen(tok[1]));
-    // strcat((char * restrict)envp[0],(char *)tok[1]);
+
     sigemptyset(&blockMask); /* Block SIGCHLD */
     sigaddset(&blockMask, SIGCHLD);
     sigprocmask(SIG_BLOCK, &blockMask, &origMask);
@@ -89,13 +104,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             break; /* Carry on to reset signal attributes */
 
         case 0: /* Child: exec CGI */
-            // Duplicating the file descriptors onto the write-ends of the pipes
-            // if (dup2(socket_fd, STDOUT_FILENO) < 0)
-            // {
-            //     perror("Could not duplicate STDOUT file descriptor to the pipe.");
-            //     status = -1;
-            //     break;
-            // }
+            
             
             /* We ignore possible error returns because the only specified error
             is for a failed exec(), and because errors in these calls can't
@@ -130,7 +139,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
             (void)close(fd_out[1]);
 
-            if (execve(executable_path, args, envp) == -1) {
+            if (execve(executable_path_after_strtok, args, envp) == -1) {
                 printf("Execve() Not able to run this");
                 send_error(500, socket_fd, is_valid_request, response, response_string);
             }
@@ -200,7 +209,6 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     /* Unblock SIGCHLD, restore dispositions of SIGINT and SIGQUIT */
 
     savedErrno = errno; /* The following may change 'errno' */
-
     sigprocmask(SIG_SETMASK, &origMask, NULL);
     sigaction(SIGINT, &saOrigInt, NULL);
     sigaction(SIGQUIT, &saOrigQuit, NULL);
@@ -209,3 +217,5 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
     return status;
 }
+
+// int data(){}

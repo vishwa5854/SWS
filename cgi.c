@@ -22,6 +22,23 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     char temp_buff[BUFSIZ];
     int fd_out[2];
     int n_chars = 0;
+    //testing code
+    printf("%s",executable_path);
+
+    // const char delimeter[4]="?";
+
+    // char *tok;
+    // tok=strtok((char * restrict)executable_path,delimeter);
+    // while(tok!=NULL){
+    //     printf("\n%d - ",count);
+    //     printf("%s \n ",tok);
+    //     tok = strtok(NULL, "?");
+    // }
+    // const char* Query_String="QUERY_STRING=";
+    const char* executable_path_after_strtok=strtok((char *)executable_path,"?");
+    const char* parameters=strtok(NULL,"?");
+    //end testing code
+
     // char tempArgs;
     // strncpy(ex)
     // char *args[]={"/bin/sh", "sh", "-c",executable_path,NULL};
@@ -32,8 +49,20 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
-    char *envp[]={"QUERY_STRING=ABCD",0};
+    /* Code for enviornment variable assigning*/
+    const char* Query_String="QUERY_STRING=";
+    const char* combined_query_string;
+    if ((combined_query_string=malloc(sizeof(char *)*(strlen(Query_String)+strlen(parameters))))==NULL){
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+    strncpy((char * restrict)combined_query_string,(char * restrict)Query_String,strlen(Query_String));//TODO change to strncpy
+    strlcat((char * restrict)combined_query_string,(char * restrict)parameters,strlen(parameters)+strlen(combined_query_string)+1);//Rough POC
+    (void)executable_path_after_strtok;//TODO remove
+    char *envp[]={(char *)combined_query_string,0};
     int errno;
+    free((void *)combined_query_string);
+    // strncat(envp[0],tok[1],strlen(tok[1]));
+    // strcat((char * restrict)envp[0],(char *)tok[1]);
     sigemptyset(&blockMask); /* Block SIGCHLD */
     sigaddset(&blockMask, SIGCHLD);
     sigprocmask(SIG_BLOCK, &blockMask, &origMask);
@@ -88,14 +117,12 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
                 sigaction(SIGINT, &saDefault, NULL);
             if (saOrigQuit.sa_handler != SIG_IGN)
                 sigaction(SIGQUIT, &saDefault, NULL);
-
             sigprocmask(SIG_SETMASK, &origMask, NULL);
             char *args[] = {"0", NULL};	/* each element represents a command line argument */
             char *env[] = { NULL };	/* leave the environment list null */
-        
+
             (void)args;
             (void)env;
-        
             // execve("/bin/ls", args, env);
             // execl("/bin/sh", "sh", "-c", executable_path, (char *)NULL);
             // printf("\n%d\n",errno);
@@ -113,11 +140,8 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             printf("\n%d\n",errno);
             fprintf(stderr, "Value of errno: %d\n", errno);
 
-
-
             // if (execve(executable_path,(char *const*)NULL,envp)==-1){
             //     printf("Execve() Not able to run this");
-            
             // }
             // printf("\n%d\n",errno);
             // fprintf(stderr, "Value of errno: %d\n", errno);
@@ -131,8 +155,10 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             (void)close(fd_out[1]);
             
 
-            /* We must use waitpid() for this task; using wait() could inadvertently
-            collect the status of one of the caller's other children */
+            /* 
+            We must use waitpid() for this task; using wait() could inadvertently
+            collect the status of one of the caller's other children 
+            */
             if (waitpid(childPid, &status, WNOHANG) < 0) {
                 perror("Could not wait for child process; waitpid resulted in error.");
                 status = -1;
@@ -161,7 +187,6 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
                 /** CGI program has not terminated, read remaining data from the pipe */
                 response->status_code = 200;
                 send_headers(socket_fd, is_valid_request, response, response_string);
-
                 /** Sending the output of the child execve to the client. */
                 while ((n_chars = read(fd_out[0], temp_buff, BUFSIZ)) > 0) {
                     (void)write(socket_fd, temp_buff, n_chars);

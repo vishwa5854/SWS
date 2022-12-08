@@ -17,7 +17,7 @@
 #define BACKLOG 5
 #define SLEEP_FOR 5
 
-int createSocket(int port) {
+int createSocket(int port, struct flags_struct flags) {
 	int sock;
 	socklen_t length;
 	struct sockaddr_in6 server;
@@ -29,8 +29,37 @@ int createSocket(int port) {
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 	}
+
+    // In the case of -i flag, make two sockets? nah thats a pain
+    // If its -i and ipv4, convert to ipv6
 	server.sin6_family = PF_INET6;
-	server.sin6_addr = in6addr_any;
+    if (flags.i_flag) {
+        const char *given_addr = flags.addr_arg;
+        struct in6_addr ip_result;
+        int inet_pton_result;
+        int inet6_pton_result;
+
+        // for IPV4
+        if ( (inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
+            printf("inet_pton parsed as ipv4!\n");
+            server.sin6_addr = ip_result;
+        } else if (inet_pton_result == 0) {
+            printf("inet_pton failed to parse as ipv4...\n");
+            // if can't parse as IPV4, try IPV6
+            // for IPV6
+            if ( (inet6_pton_result = inet_pton(PF_INET6, given_addr, &ip_result)) == 1) {
+                printf("inet_pton parsed as ipv6!\n");
+                server.sin6_addr = ip_result;
+            } else if (inet6_pton_result == 0) {
+                printf("inet_pton: string not parsable!\n");
+            }
+        } else {
+            printf("inet_pton failed!\n");
+        }
+    } else {
+        server.sin6_addr = in6addr_any;
+    }
+	
 	server.sin6_port = port;
 
     int off = 0;
@@ -166,15 +195,15 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", argv[0]);
 		    exit(EXIT_FAILURE);
         }
-        socket = createSocket(htons(input_int));
+        socket = createSocket(htons(input_int), flags);
     } else {
-        socket = createSocket(0);
+        socket = createSocket(0, flags);
     }
 
     if (flags.d_flag) {
         // logging already to stdout
         // not yet daemonized
-        selectSocket(socket, flags);        
+        selectSocket(socket, flags);
         return EXIT_SUCCESS;
    } else {
         int daemon_ret;

@@ -208,8 +208,10 @@ void handleSocket(int socket, struct flags_struct flags) {
     }
 
     if (flags.d_flag) {
+        current_fd = fd;
+        signal(SIGALRM, alarm_handler);
+        alarm(TIMEOUT);
         handleConnection(fd, client);
-        exit(EXIT_SUCCESS);
     }
 
     if ((pid = fork()) < 0) {

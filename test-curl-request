@@ -1,0 +1,1 @@
+curl --http1.0 -v --location --request GET 'http://localhost:65532/home/z/chutiya.sh

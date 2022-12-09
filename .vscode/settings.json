@@ -4,6 +4,7 @@
         "structures.h": "c",
         "handler.h": "c",
         "strings.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "urlparser.h": "c"
     }
 }

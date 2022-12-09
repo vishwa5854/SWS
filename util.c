@@ -147,11 +147,9 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            /** TODO: */
-            printf("%d\n", is_valid(token, HTTP_URL_REGEX));
-            
-            return valid;
-            // URI validation
+            printf("Given url is valid or not : %d\n", (is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX)));
+            /** The path could be http prefix or just the file system path */
+            valid = is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX);
             break;
         case 2:
             /** Protocol and version check bruh. */
@@ -175,6 +173,7 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
         /** Not to confuse with token#4 instead used for If-Modified-Since header. */
         case 3:
             valid = is_valid(token, HTTP_DATE_REGEX);
+            
             if (valid) {
                 (void)strncpy(request->if_modified_since, token, strlen(token));
             }
@@ -202,11 +201,3 @@ void reset_request_object(REQUEST* request) {
     bzero(request->protocol, sizeof(request->protocol));
     bzero(request->version, sizeof(request->version));
 }
-
-// bool validate_URL(char* URL) {
-    /**
-     * 1. http[s]://chutiyapa/--this is what we need
-     * 2. Direct path /../../../
-     * 3. Starts with / */
-    
-// }

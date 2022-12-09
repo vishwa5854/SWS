@@ -58,7 +58,13 @@
 /** TODO: Update the regex for two other formats mentioned in the RFC */
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
 
-#define HTTP_URL_REGEX "[http|https]://([a-zA-Z]+(\\.[a-zA-Z]+)+)/[A-Za-z0-9]+"
+#define HTTP_URL_REGEX "^https?://[a-zA-Z0-9.-:]+/[a-zA-Z0-9/.?&=_]+$"
+
+#define FILE_PATH_REGEX "^(/[a-zA-Z0-9._-~]*)*$"
+
+#define CGI 1
+
+#define FILE_SERVING 2
 
 /** 
  * Status-Code  = "200"   ; OK
@@ -97,6 +103,7 @@
 typedef struct HTTP_REQUEST {
     char verb[HTTP_VERB_MAX_LEN];
     char path[PATH_MAX];
+    int  path_type;
     char protocol[PROTOCOL_MAX_LEN];
     char version[PROTOCOL_VERSION_MAX_LEN];
     char if_modified_since[DATE_MAX_LEN];

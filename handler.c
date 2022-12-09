@@ -1,11 +1,13 @@
 #include "handler.h"
-#include "flags.h"
+
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
-#include "util.h"
+
+#include "flags.h"
 #include "structures.h"
-#include "cgi.h"
+#include "urlparser.h"
+#include "util.h"
 
 int current_fd;
 bool close_current_connection = true;
@@ -21,10 +23,13 @@ void close_connection(int fd) {
 
 void createResponse(RESPONSE *response) {
     (void)strncpy((*response).server, SERVER, strlen(SERVER));
-    (void)strncpy((*response).content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
+    (void)strncpy((*response).content_type, CONTENT_TYPE_DEFAULT,
+                  strlen(CONTENT_TYPE_DEFAULT));
     get_gmt_date_str((*response).date, DATE_MAX_LEN);
-    (void)strncpy((*response).protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
-    (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
+    (void)strncpy((*response).protocol, SUPPORTED_PROTOCOL_ONLY,
+                  strlen(SUPPORTED_PROTOCOL_ONLY));
+    (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY,
+                  strlen(SUPPORTED_VERSION_ONLY));
     (*response).last_modified[0] = '\0';
     (*response).content_length = 0;
     get_status_verb((*response).status_code, (*response).status_verb);
@@ -38,18 +43,23 @@ void alarm_handler(int sig_num) {
     }
 }
 
-void handleFirstLine(int fd, const char *separator, char *token, char *line_buffer, bool *is_first_line,
+void handleFirstLine(int fd, const char *separator, char *token,
+                     char *line_buffer, bool *is_first_line,
                      bool *is_valid_request, REQUEST *request) {
     /**
-    * 1. Split the string and set the request type, resource URI, protocol & version
-    * 2. Validate all of them and then if it's valid then continue else terminate connection
-    */
+     * 1. Split the string and set the request type, resource URI, protocol &
+     * version
+     * 2. Validate all of them and then if it's valid then continue else
+     * terminate connection
+     */
     int iterator = 0;
     token = strtok(line_buffer, separator);
 
     while (token != NULL) {
         if (iterator <= 2) {
-            (*is_valid_request) = (*is_valid_request) && create_request_frame(request, token, iterator);
+            (*is_valid_request) =
+                (*is_valid_request) &&
+                create_request_frame(request, token, iterator);
 
             /** This is for testing purpose only */
             if (iterator == 1) {
@@ -71,8 +81,10 @@ void handleFirstLine(int fd, const char *separator, char *token, char *line_buff
     }
 }
 
-/** Make sure to set the status_code and content length before calling this function :) */
-void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *response_string) {
+/** Make sure to set the status_code and content length before calling this
+ * function :) */
+void send_headers(int fd, bool is_valid_request, RESPONSE *response,
+                  char *response_string) {
     if ((*response).status_code == 0) {
         if (!is_valid_request) {
             (*response).status_code = 400;
@@ -83,9 +95,10 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *respo
 
     createResponse(response);
     /**
-     * Even when the timeout is done, we shouldn't close this connection as user is done with his shit
-     * and we are the ones pending to serve either dir indexing, file serving or CGI execution
-    */
+     * Even when the timeout is done, we shouldn't close this connection as user
+     * is done with his shit and we are the ones pending to serve either dir
+     * indexing, file serving or CGI execution
+     */
     close_current_connection = false;
     /** We stop taking anything else from client now */
     (void)create_response_string(response, response_string);
@@ -97,7 +110,8 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     const char *rip;
     char claddr[INET6_ADDRSTRLEN];
 
-    if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
+    if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr,
+                         INET6_ADDRSTRLEN)) == NULL) {
         perror("inet_ntop");
     } else {
         (void)printf("Client connection from %s!\n", rip);
@@ -105,14 +119,14 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
 
     bool is_first_line = true;
     char separator[2] = " ";
-    char* token;
+    char *token;
     bool is_valid_request = true;
     REQUEST request;
     RESPONSE response;
     response.status_code = 0;
     char response_string[BUFSIZ];
     bzero(response_string, sizeof(response_string));
-    
+
     reset_request_object(&request);
     reset_response_object(&response);
 
@@ -121,7 +135,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     bool last_char_was_next_line = false;
     bool stream_done = false;
     bool end_of_request = false;
-    
+
     while (!stream_done) {
         int cursor = 0;
         char line_buffer[SUPPORTED_MAX_HEADER_SIZE + 1];
@@ -148,7 +162,8 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 }
             }
 
-            /** Client has given a header that is greater than the size we accept. */
+            /** Client has given a header that is greater than the size we
+             * accept. */
             if (cursor >= SUPPORTED_MAX_HEADER_SIZE) {
                 end_of_request = true;
                 response.status_code = 413;
@@ -169,20 +184,21 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         }
 
         if (number_of_headers == 1) {
-           handleFirstLine(fd, separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
+            handleFirstLine(fd, separator, token, line_buffer, &is_first_line,
+                            &is_valid_request, &request);
         } else {
-            /** Reading the headers we don't validate or care about anything else except for If-Modified-Since */
-           token = strtok(line_buffer, separator);
+            /** Reading the headers we don't validate or care about anything
+             * else except for If-Modified-Since */
+            token = strtok(line_buffer, separator);
 
-           if (
-                (strlen(token) == strlen(SUPPORTED_HEADER)) &&
-                (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)
-            ) {
-               token = strtok(NULL, "");
-               is_valid_request = is_valid_request && create_request_frame(&request, token, 3);
-           } else {
-               continue;
-           }
+            if ((strlen(token) == strlen(SUPPORTED_HEADER)) &&
+                (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)) {
+                token = strtok(NULL, "");
+                is_valid_request = is_valid_request &&
+                                   create_request_frame(&request, token, 3);
+            } else {
+                continue;
+            }
         }
     }
 
@@ -198,7 +214,7 @@ void handleSocket(int socket, struct flags_struct flags) {
     pid_t pid;
     struct sockaddr_in6 client;
     socklen_t length;
-    
+
     memset(&client, 0, sizeof(client));
     length = sizeof(client);
 

@@ -56,7 +56,15 @@
 #define TIMEOUT 120
 
 /** TODO: Update the regex for two other formats mentioned in the RFC */
+
+// redefine HHTP_DATE_REGEX as OR of the three regex already defined
+
+// THIS IS JUST RFC-1123 DATE
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
+#define RFC_850_DATE_REGEX "(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ([0-3][0-9])-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-([0-9][0-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
+#define ASCTIME_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (([0-3][0-9])| [1-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} ([0-9][0-9][0-9][0-9])"
 
 #define HTTP_URL_REGEX "[http|https]://([a-zA-Z]+(\\.[a-zA-Z]+)+)/[A-Za-z0-9]+"
 

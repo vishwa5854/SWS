@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "flags.h"
+#include "structures.h"
 
 // backlog used for listen, maybe change from 5? see listen(2)
 #define BACKLOG 5
@@ -40,9 +41,9 @@ int createSocket(int port, struct flags_struct flags) {
 
         // if string passed is IPV4, append an IPV6 prefix to it
         if ((inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
-            char v4tov6_prefix[46] = "::FFFF:";
-            (void) strcat(v4tov6_prefix, given_addr);
-            (void) strncpy(given_addr, v4tov6_prefix, 46);
+            char v4tov6_prefix[IPV6_MAXSTRLEN] = "::FFFF:";
+            (void) strncat(v4tov6_prefix, given_addr, IPV6_MAXSTRLEN);
+            (void) strncpy(given_addr, v4tov6_prefix, IPV6_MAXSTRLEN);
         } else if (inet_pton_result < 0) {
             perror("inet_pton");
             exit(EXIT_FAILURE);
@@ -175,7 +176,8 @@ int main(int argc, char **argv) {
     }
 
     // If no -p flag provided, set port to 8080 by default
-    strncpy(flags.port_arg, "8080", 5);
+    // strnlen
+    strncpy(flags.port_arg, DEFAULT_PORT, strnlen(DEFAULT_PORT, 6));
     flags.p_flag = 1;
 
     int socket;

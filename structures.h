@@ -55,6 +55,12 @@
 /** An average human with average typing speed will be able to give atleast basic headers within two minutes */
 #define TIMEOUT 120
 
+/** Maximum length of a string representing a valid IPV6 IP or valid IPV4 IP as represented in IPV6 */
+#define IPV6_MAXSTRLEN 46
+
+/** Default port is port 8080 if no port is passed via -p*/
+#define DEFAULT_PORT "8080"
+
 /** TODO: Update the regex for two other formats mentioned in the RFC */
 
 // redefine HHTP_DATE_REGEX as OR of the three regex already defined

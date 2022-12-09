@@ -40,12 +40,9 @@ int createSocket(int port, struct flags_struct flags) {
 
         // if string passed is IPV4, append an IPV6 prefix to it
         if ((inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
-            printf("inet_pton parsed as ipv4!\n");
             char v4tov6_prefix[46] = "::FFFF:";
-            (void) strcat(v4tov6_prefix, given_addr); // error check
-            printf("v4tov6 prefix now: %s\n", v4tov6_prefix);
-            strncpy(given_addr, v4tov6_prefix, 46);
-            printf("given addr now: %s\n", given_addr);
+            (void) strcat(v4tov6_prefix, given_addr);
+            (void) strncpy(given_addr, v4tov6_prefix, 46);
         } else if (inet_pton_result < 0) {
             perror("inet_pton");
             exit(EXIT_FAILURE);
@@ -108,11 +105,18 @@ void reap() {
 void selectSocket(int socket, struct flags_struct flags) {
     fd_set ready;
     struct timeval to;
+    int select_return;
     FD_ZERO(&ready);
     FD_SET(socket, &ready);
     to.tv_sec = SLEEP_FOR;
     to.tv_usec = 0;
-    if (select(socket + 1, &ready, 0, 0, &to) < 0) {
+
+    if (flags.d_flag) {
+        select_return = select(socket + 1, &ready, 0, 0, NULL);
+    } else {
+        select_return = select(socket + 1, &ready, 0, 0, &to);
+    }
+    if (select_return < 0) {
         if (errno != EINTR) {
             perror("select");
         }
@@ -134,11 +138,6 @@ int main(int argc, char **argv) {
     // Create new flags struct, initializing all flags to 0
     struct flags_struct flags = {0};
 
-    // defaults are to listen on all ipv4 and ipv6 addresses, and port 8080
-    // use INADDR_ANY to listen for all available ips
-    strncpy(flags.port_arg, "8080", 5);
-
-    
     // for each optarg case, we copy the exact data needed, then explicitly add null byte
     int opt;
 
@@ -175,23 +174,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    
-    /*
-    if (!flags.d_flag) {
-        int daemon_ret;
-        if ((daemon_ret = daemon(0, 0)) == -1){
-            perror("creating daemon");
-		    return EXIT_FAILURE;
-        }
-        // our process is now a daemon.
-
-        // here we fork and handle any number of connections
-        
-    } else {
-        // debug mode here
-        // accept one connection at a time, log to stdout
-    }
-    */
+    // If no -p flag provided, set port to 8080 by default
+    strncpy(flags.port_arg, "8080", 5);
+    flags.p_flag = 1;
 
     int socket;
     if (flags.p_flag) {

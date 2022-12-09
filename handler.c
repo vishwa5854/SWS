@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "util.h"
 #include "structures.h"
 #include "cgi.h"
@@ -186,10 +187,33 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         }
     }
 
-    send_headers(fd, is_valid_request, &response, response_string);
+    if (is_valid_request) {
+        struct tm tm;
+        time_t t;
+        if (request.if_modified_str_type == 1) {
+            if (strptime(request.if_modified_since, "%a, %d, %b %Y %T GMT", &tm) != NULL) {
+                printf("strptime failed \n");
+            }
+        } else if (request.if_modified_str_type == 2) {
+            if (strptime(request.if_modified_since, "%a, %d-%b-%y %T GMT", &tm) != NULL) {
+                printf("strptime failed \n");
+            }
+        } else {
+            if (strptime(request.if_modified_since, "%a %b %d %T %Y GMT", &tm) != NULL) {
+                printf("strptime failed \n");
+            }
+        }
+        if ((t = mktime(&tm)) < 0) {
+            perror("mktime");
+        }
+        printf(request.if_modified_since);
+    } else {
+        send_headers(fd, is_valid_request, &response, response_string);
+        /** Bubyeee */
+        close_connection(fd);
+    }
 
-    /** Bubyeee */
-    close_connection(fd);
+
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */

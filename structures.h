@@ -114,6 +114,12 @@ typedef struct HTTP_REQUEST {
     char protocol[PROTOCOL_MAX_LEN];
     char version[PROTOCOL_VERSION_MAX_LEN];
     char if_modified_since[DATE_MAX_LEN];
+    int if_modified_str_type; // type of given if_modified_since string.
+    // 1 maps to RFC822, aka RFC 1123 val. 
+    // 2 maps to RFC 850, aka RFC 1036 val.
+    // 3 maps to asctime val
+    // all other values of this int are not recognized!
+    time_t if_modified_t; // if_modified_since seconds since epoch
     int time_request_made;
 } REQUEST;
 

@@ -25,36 +25,41 @@ int createSocket(int port, struct flags_struct flags) {
 	memset(&server, 0, sizeof(server));
 
 	if ((sock = socket(PF_INET6, SOCK_STREAM, 0)) < 0) {
-		perror("opening stream socket");
+		perror("socket");
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 	}
-
-    // In the case of -i flag, make two sockets? nah thats a pain
-    // If its -i and ipv4, convert to ipv6
-	server.sin6_family = PF_INET6;
+	
+    server.sin6_family = PF_INET6;
+    // if i flag, support single IP only instead of multiple IPs
     if (flags.i_flag) {
-        const char *given_addr = flags.addr_arg;
+        char* given_addr = flags.addr_arg;
         struct in6_addr ip_result;
         int inet_pton_result;
         int inet6_pton_result;
 
-        // for IPV4
-        if ( (inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
+        // if string passed is IPV4, append an IPV6 prefix to it
+        if ((inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
             printf("inet_pton parsed as ipv4!\n");
+            char v4tov6_prefix[46] = "::FFFF:";
+            (void) strcat(v4tov6_prefix, given_addr); // error check
+            printf("v4tov6 prefix now: %s\n", v4tov6_prefix);
+            strncpy(given_addr, v4tov6_prefix, 46);
+            printf("given addr now: %s\n", given_addr);
+        } else if (inet_pton_result < 0) {
+            perror("inet_pton");
+            exit(EXIT_FAILURE);
+        }
+
+        if ( (inet6_pton_result = inet_pton(PF_INET6, given_addr, &ip_result)) == 1) {
+            printf("inet_pton parsed as ipv6!\n");
             server.sin6_addr = ip_result;
-        } else if (inet_pton_result == 0) {
-            printf("inet_pton failed to parse as ipv4...\n");
-            // if can't parse as IPV4, try IPV6
-            // for IPV6
-            if ( (inet6_pton_result = inet_pton(PF_INET6, given_addr, &ip_result)) == 1) {
-                printf("inet_pton parsed as ipv6!\n");
-                server.sin6_addr = ip_result;
-            } else if (inet6_pton_result == 0) {
-                printf("inet_pton: string not parsable!\n");
-            }
+        } else if (inet6_pton_result == 0) {
+            printf("inet_pton: string not parsable!\n");
+            exit(EXIT_FAILURE);
         } else {
-            printf("inet_pton failed!\n");
+            perror("inet_pton");
+            exit(EXIT_FAILURE);
         }
     } else {
         server.sin6_addr = in6addr_any;
@@ -208,7 +213,7 @@ int main(int argc, char **argv) {
    } else {
         int daemon_ret;
         if ((daemon_ret = daemon(0, 0)) == -1){
-            perror("creating daemon");
+            perror("daemon");
 		    return EXIT_FAILURE;
         }
         // our process is now a daemon and continues.

@@ -50,7 +50,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     char *envp[]={(char *)combined_query_string,0};
 
     free((void *)combined_query_string);
-    
+
     /* Check if file exsists and has executable permission with the respective error codes*/
     if(access(executable_path_after_strtok,F_OK)==-1){
         send_error(404, socket_fd, is_valid_request, response, response_string);
@@ -61,12 +61,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     
     //end testing code
 
-    // char tempArgs;
-    // strncpy(ex)
-    // char *args[]={"/bin/sh", "sh", "-c",executable_path,NULL};
-    // for(int i=0; i<2;i++){
-    //     printf("%s",args[i]);
-    // }
+
 
     sigset_t blockMask, origMask;
     // int flag=0;

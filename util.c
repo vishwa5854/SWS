@@ -174,9 +174,21 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         /** Not to confuse with token#4 instead used for If-Modified-Since header. */
         case 3:
-            valid = is_valid(token, HTTP_DATE_REGEX);
-            if (valid) {
+            puts("util.c executing\n");
+            if (is_valid(token, HTTP_DATE_REGEX)) {
+                valid = true;
+                request->if_modified_str_type = 1;
                 (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else if (is_valid(token, RFC_850_DATE_REGEX)) {
+                valid=true;
+                request->if_modified_str_type = 2;
+                (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else if (is_valid(token, ASCTIME_DATE_REGEX)) {
+                valid=true;
+                request->if_modified_str_type = 3;
+                (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else {
+                valid=false;
             }
             break;
         default:

@@ -12,12 +12,13 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "flags.h"
+#include "structures.h"
 
-// backlog used for listen, maybe change from 5? see listen(2)
-#define BACKLOG 5
+// listen(2) states backlog silently limited to 128
+#define BACKLOG 128 
 #define SLEEP_FOR 5
 
-int createSocket(int port) {
+int createSocket(int port, struct flags_struct flags) {
 	int sock;
 	socklen_t length;
 	struct sockaddr_in6 server;
@@ -25,12 +26,43 @@ int createSocket(int port) {
 	memset(&server, 0, sizeof(server));
 
 	if ((sock = socket(PF_INET6, SOCK_STREAM, 0)) < 0) {
-		perror("opening stream socket");
+		perror("socket");
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 	}
-	server.sin6_family = PF_INET6;
-	server.sin6_addr = in6addr_any;
+	
+    server.sin6_family = PF_INET6;
+    // if i flag, support single IP only instead of multiple IPs
+    if (flags.i_flag) {
+        char* given_addr = flags.addr_arg;
+        struct in6_addr ip_result;
+        int inet_pton_result;
+        int inet6_pton_result;
+
+        // if string passed is IPV4, append an IPV6 prefix to it
+        if ((inet_pton_result = inet_pton(PF_INET, given_addr, &ip_result)) == 1) {
+            char v4tov6_prefix[IPV6_MAXSTRLEN] = "::FFFF:";
+            (void) strncat(v4tov6_prefix, given_addr, IPV6_MAXSTRLEN);
+            (void) strncpy(given_addr, v4tov6_prefix, IPV6_MAXSTRLEN);
+        } else if (inet_pton_result < 0) {
+            perror("inet_pton");
+            exit(EXIT_FAILURE);
+        }
+
+        if ( (inet6_pton_result = inet_pton(PF_INET6, given_addr, &ip_result)) == 1) {
+            printf("inet_pton parsed as ipv6!\n");
+            server.sin6_addr = ip_result;
+        } else if (inet6_pton_result == 0) {
+            printf("inet_pton: string not parsable!\n");
+            exit(EXIT_FAILURE);
+        } else {
+            perror("inet_pton");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        server.sin6_addr = in6addr_any;
+    }
+	
 	server.sin6_port = port;
 
     int off = 0;
@@ -74,11 +106,18 @@ void reap() {
 void selectSocket(int socket, struct flags_struct flags) {
     fd_set ready;
     struct timeval to;
+    int select_return;
     FD_ZERO(&ready);
     FD_SET(socket, &ready);
     to.tv_sec = SLEEP_FOR;
     to.tv_usec = 0;
-    if (select(socket + 1, &ready, 0, 0, &to) < 0) {
+
+    if (flags.d_flag) {
+        select_return = select(socket + 1, &ready, 0, 0, NULL);
+    } else {
+        select_return = select(socket + 1, &ready, 0, 0, &to);
+    }
+    if (select_return < 0) {
         if (errno != EINTR) {
             perror("select");
         }
@@ -100,11 +139,6 @@ int main(int argc, char **argv) {
     // Create new flags struct, initializing all flags to 0
     struct flags_struct flags = {0};
 
-    // defaults are to listen on all ipv4 and ipv6 addresses, and port 8080
-    // use INADDR_ANY to listen for all available ips
-    strncpy(flags.port_arg, "8080", 5);
-
-    
     // for each optarg case, we copy the exact data needed, then explicitly add null byte
     int opt;
 
@@ -141,23 +175,10 @@ int main(int argc, char **argv) {
         }
     }
 
-    
-    /*
-    if (!flags.d_flag) {
-        int daemon_ret;
-        if ((daemon_ret = daemon(0, 0)) == -1){
-            perror("creating daemon");
-		    return EXIT_FAILURE;
-        }
-        // our process is now a daemon.
-
-        // here we fork and handle any number of connections
-        
-    } else {
-        // debug mode here
-        // accept one connection at a time, log to stdout
-    }
-    */
+    // If no -p flag provided, set port to 8080 by default
+    // strnlen
+    strncpy(flags.port_arg, DEFAULT_PORT, strnlen(DEFAULT_PORT, 6));
+    flags.p_flag = 1;
 
     int socket;
     if (flags.p_flag) {
@@ -166,20 +187,20 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", argv[0]);
 		    exit(EXIT_FAILURE);
         }
-        socket = createSocket(htons(input_int));
+        socket = createSocket(htons(input_int), flags);
     } else {
-        socket = createSocket(0);
+        socket = createSocket(0, flags);
     }
 
     if (flags.d_flag) {
         // logging already to stdout
         // not yet daemonized
-        selectSocket(socket, flags);        
+        selectSocket(socket, flags);
         return EXIT_SUCCESS;
    } else {
         int daemon_ret;
         if ((daemon_ret = daemon(0, 0)) == -1){
-            perror("creating daemon");
+            perror("daemon");
 		    return EXIT_FAILURE;
         }
         // our process is now a daemon and continues.

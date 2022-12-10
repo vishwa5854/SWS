@@ -55,8 +55,22 @@
 /** An average human with average typing speed will be able to give atleast basic headers within two minutes */
 #define TIMEOUT 120
 
+/** Maximum length of a string representing a valid IPV6 IP or valid IPV4 IP as represented in IPV6 */
+#define IPV6_MAXSTRLEN 46
+
+/** Default port is port 8080 if no port is passed via -p*/
+#define DEFAULT_PORT "8080"
+
 /** TODO: Update the regex for two other formats mentioned in the RFC */
+
+// redefine HHTP_DATE_REGEX as OR of the three regex already defined
+
+// THIS IS JUST RFC-1123 DATE
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
+#define RFC_850_DATE_REGEX "(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ([0-3][0-9])-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-([0-9][0-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
+
+#define ASCTIME_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (([0-3][0-9])| [1-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} ([0-9][0-9][0-9][0-9])"
 
 #define HTTP_URL_REGEX "[http|https]://([a-zA-Z]+(\\.[a-zA-Z]+)+)/[A-Za-z0-9]+"
 
@@ -100,6 +114,12 @@ typedef struct HTTP_REQUEST {
     char protocol[PROTOCOL_MAX_LEN];
     char version[PROTOCOL_VERSION_MAX_LEN];
     char if_modified_since[DATE_MAX_LEN];
+    int if_modified_str_type; // type of given if_modified_since string.
+    // 1 maps to RFC822, aka RFC 1123 val. 
+    // 2 maps to RFC 850, aka RFC 1036 val.
+    // 3 maps to asctime val
+    // all other values of this int are not recognized!
+    time_t if_modified_t; // if_modified_since seconds since epoch
     int time_request_made;
 } REQUEST;
 

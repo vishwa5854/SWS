@@ -187,7 +187,8 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         }
     }
 
-    if (is_valid_request) {
+    if (is_valid_request && (request.if_modified_str_type != 0)) {
+        
         struct tm tm;
         time_t t;
         if (request.if_modified_str_type == 1) {
@@ -203,13 +204,12 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
                 printf("strptime failed.\n");
             }
         }
-
+        
         if ((t = mktime(&tm)) < 0) {
             printf("mktime failed.\n");
         }
 
         request.if_modified_t = t;
-
         send_headers(fd, is_valid_request, &response, response_string);
         /** Bubyeee */
         close_connection(fd);

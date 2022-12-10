@@ -213,6 +213,9 @@ void reset_request_object(REQUEST* request) {
     bzero(request->path, sizeof(request->path));
     bzero(request->protocol, sizeof(request->protocol));
     bzero(request->version, sizeof(request->version));
+    request->if_modified_str_type = 0;
+    request->if_modified_t = 0;
+    request->time_request_made = 0;
 }
 
 // bool validate_URL(char* URL) {

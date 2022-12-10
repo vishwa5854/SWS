@@ -14,7 +14,7 @@
 #include "flags.h"
 #include "structures.h"
 
-// listen(2) states backlog silently limited to 128
+// listen(2) states backlog silently limited to 128, we 
 #define BACKLOG 128 
 #define SLEEP_FOR 5
 
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
                 printUsage(argv[0]);
                 return EXIT_SUCCESS;
             case 'i':
-                strncpy(flags.addr_arg, optarg, 45);
+                strncpy(flags.addr_arg, optarg, IPV6_MAXSTRLEN-1);
                 flags.addr_arg[45] = '\0';
                 flags.i_flag = 1;
                 break;
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
                 flags.l_flag = 1;
                 break;
             case 'p':
-                strncpy(flags.port_arg, optarg, 6);
+                strncpy(flags.port_arg, optarg, PORT_MAXSTRLEN);
                 flags.port_arg[5] = '\0';
                 flags.p_flag = 1;
                 break;
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
 
     // If no -p flag provided, set port to 8080 by default
     // strnlen
-    strncpy(flags.port_arg, DEFAULT_PORT, strnlen(DEFAULT_PORT, 6));
+    strncpy(flags.port_arg, DEFAULT_PORT, strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
     flags.p_flag = 1;
 
     int socket;

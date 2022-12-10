@@ -58,6 +58,9 @@
 /** Maximum length of a string representing a valid IPV6 IP or valid IPV4 IP as represented in IPV6 */
 #define IPV6_MAXSTRLEN 46
 
+/** Maximum length of a string representing a valid port number.*/
+#define PORT_MAXSTRLEN 6
+
 /** Default port is port 8080 if no port is passed via -p*/
 #define DEFAULT_PORT "8080"
 

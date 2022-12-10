@@ -14,7 +14,7 @@ struct flags_struct {
     char cdi_dir_arg[PATH_MAX+1]; // limiting cgi dir name to PATH_MAX +1
     char addr_arg[IPV6_MAXSTRLEN]; // max length of v4 addr mapped to ipv6, +1 for null byte
     char log_file_arg[PATH_MAX+1]; // limiting log file name to PATH_MAX +1
-    char port_arg[6]; // fits strings "0" to 65,535, the max port number
+    char port_arg[PORT_MAXSTRLEN]; // fits strings "0" to 65,535, the max port number
     // port_arg needs to be taken as a string, then converted to unsigned short
 };
 

@@ -191,22 +191,28 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
         struct tm tm;
         time_t t;
         if (request.if_modified_str_type == 1) {
-            if (strptime(request.if_modified_since, "%a, %d, %b %Y %T GMT", &tm) != NULL) {
-                printf("strptime failed \n");
+            if (strptime(request.if_modified_since, "%a, %d %b %Y %T GMT", &tm) != NULL) {
+                printf("strptime failed.\n");
             }
         } else if (request.if_modified_str_type == 2) {
             if (strptime(request.if_modified_since, "%a, %d-%b-%y %T GMT", &tm) != NULL) {
-                printf("strptime failed \n");
+                printf("strptime failed.\n");
             }
         } else {
             if (strptime(request.if_modified_since, "%a %b %d %T %Y GMT", &tm) != NULL) {
-                printf("strptime failed \n");
+                printf("strptime failed.\n");
             }
         }
+
         if ((t = mktime(&tm)) < 0) {
-            perror("mktime");
+            printf("mktime failed.\n");
         }
-        printf(request.if_modified_since);
+
+        request.if_modified_t = t;
+
+        send_headers(fd, is_valid_request, &response, response_string);
+        /** Bubyeee */
+        close_connection(fd);
     } else {
         send_headers(fd, is_valid_request, &response, response_string);
         /** Bubyeee */

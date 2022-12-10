@@ -14,8 +14,8 @@
 #include "flags.h"
 #include "structures.h"
 
-// backlog used for listen, maybe change from 5? see listen(2)
-#define BACKLOG 5
+// listen(2) states backlog silently limited to 128
+#define BACKLOG 128 
 #define SLEEP_FOR 5
 
 int createSocket(int port, struct flags_struct flags) {

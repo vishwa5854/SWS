@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'c':
                 strncpy(flags.cdi_dir_arg, optarg, PATH_MAX);
-                flags.cdi_dir_arg[PATH_MAX] = '\0';
+                flags.cdi_dir_arg[PATH_MAX+1] = '\0';
                 flags.c_flag = 1;
                 break;
             case 'd':
@@ -162,12 +162,12 @@ int main(int argc, char **argv) {
                 break;
             case 'l':
                 strncpy(flags.log_file_arg, optarg, PATH_MAX);
-                flags.log_file_arg[PATH_MAX] = '\0';
+                flags.log_file_arg[PATH_MAX+1] = '\0';
                 flags.l_flag = 1;
                 break;
             case 'p':
                 strncpy(flags.port_arg, optarg, PORT_MAXSTRLEN);
-                flags.port_arg[5] = '\0';
+                flags.port_arg[PORT_MAXSTRLEN+1] = '\0';
                 flags.p_flag = 1;
                 break;
             case '?':
@@ -175,16 +175,30 @@ int main(int argc, char **argv) {
         }
     }
 
+    // This effectively removes flags from argc and argv.
+    char* executable_name = argv[0];
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1) {
+        printUsage(executable_name);
+        return EXIT_FAILURE;
+    }
+
+    strncpy(flags.argument_path, argv[0], PATH_MAX);
+    flags.argument_path[PATH_MAX+1] = '\0';
+
     // If no -p flag provided, set port to 8080 by default
     // strnlen
     strncpy(flags.port_arg, DEFAULT_PORT, strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
+    flags.port_arg[PORT_MAXSTRLEN+1] = '\0';
     flags.p_flag = 1;
 
     int socket;
     if (flags.p_flag) {
         int input_int = atoi(flags.port_arg);
         if ((input_int < 0) || (input_int > 65535)) {
-            fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", argv[0]);
+            fprintf(stderr, "%s: Port number must be an int between 0 and 65,535.\n", executable_name);
 		    exit(EXIT_FAILURE);
         }
         socket = createSocket(htons(input_int), flags);

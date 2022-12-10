@@ -15,6 +15,7 @@ struct flags_struct {
     char addr_arg[IPV6_MAXSTRLEN]; // max length of v4 addr mapped to ipv6, +1 for null byte
     char log_file_arg[PATH_MAX+1]; // limiting log file name to PATH_MAX +1
     char port_arg[PORT_MAXSTRLEN]; // fits strings "0" to 65,535, the max port number
+    char argument_path[PATH_MAX+1]; // argument passed into the funciton
     // port_arg needs to be taken as a string, then converted to unsigned short
 };
 

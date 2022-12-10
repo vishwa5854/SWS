@@ -28,11 +28,28 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
         send_error(500, fd, is_valid_request, response, response_string);
         return;
     }
-    
-	/* Lock user in the current working directory */
+          /* Lock user in the current working directory */
     if (strncmp(path, cwd, strlen(cwd)) != 0 && flag) {
-        send_error(401, fd, is_valid_request, response, response_string);
-        return;
+            bzero(path, strlen(path));
+            if (strncpy(path, "./", strlen("./")) == NULL) {
+                    send_error(500, fd, is_valid_request, response, response_string);
+                    return;
+            }
+            if (strncat(path, dirname, strlen(dirname)) == NULL) {
+                    send_error(500, fd, is_valid_request, response, response_string);
+                    return;
+            }
+
+
+            if (realpath(path, path) == NULL) {
+                    send_error(404, fd, is_valid_request, response, response_string);
+                    return;
+            }
+
+            if (strncmp(path, cwd, strlen(cwd)) != 0) {
+                    send_error(401, fd, is_valid_request, response, response_string);
+                    return;
+            }
     }
     DIR* dir;
     struct dirent* dirp;

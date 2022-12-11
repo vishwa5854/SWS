@@ -93,7 +93,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
     char *where_is_cgi=strstr(variable_executable_path,find_string);
     
-    char * resolved_path_starting_bak=malloc(sizeof(char)*(strlen(resolved_path_of_starting)+1));
+    char * resolved_path_starting_bak=malloc(sizeof(char)*(strlen(resolved_path_of_starting)+2));// added 2 if slash required and null
     strncpy(resolved_path_starting_bak,resolved_path_of_starting,strlen(resolved_path_of_starting));
 
     printf("\n resolved path 1 ---- %s ----\n", resolved_path_of_starting);
@@ -110,8 +110,6 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     
         send_error(404, socket_fd, is_valid_request, response, response_string);
     }
-    
-    
     
     if (parameters_array == NULL)
     {
@@ -154,6 +152,9 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
     printf("\n ---- %s ----\n", resolved_path_of_executable_path);
     printf("\n resolved path ---- %s ----\n", resolved_path_of_starting);
     printf("\n resolved_path_starting_bak %s ---- \n",resolved_path_starting_bak);
+    printf("\n Resolved path length %ld \n",strlen(resolved_path_starting_bak));
+    strncat(resolved_path_starting_bak,"/",strlen("/"));
+    printf("\n resolved_path_starting_bak %s ---- \n",resolved_path_starting_bak);
     if(strstr(resolved_path_of_executable_path,resolved_path_starting_bak)==NULL){
         printf("\n in here 11 \n");
          send_error(401, socket_fd, is_valid_request, response, response_string);
@@ -166,6 +167,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
     /* Code for converting the given request path to realpath */
 
+    
     
     printf("\n This is resolved path %s \n",resolved_path_of_executable_path);
     sigset_t blockMask, origMask;

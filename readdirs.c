@@ -103,7 +103,9 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
         char* line = NULL;
         size_t linesize = 0;
     
+        puts("Here");
 	    while ((temp = getline(&line, &linesize, fp)) != -1) {
+            puts("Hereasdas");
 		    write(fd, line, strlen(line));
             }
 	    write(fd, "\n", strlen("\n"));

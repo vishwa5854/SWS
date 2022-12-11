@@ -147,11 +147,11 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            /** TODO: */
-            printf("Validity check bruh : %d\n", is_valid(token, HTTP_URL_REGEX));
-            (void)strncpy(request->path, token, strlen(token));
-            return valid;
-            // URI validation
+            valid = is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX);
+            
+            if (valid) {
+                (void)strncpy(request->path, token, strlen(token));
+            }
             break;
         case 2:
             /** Protocol and version check bruh. */
@@ -174,9 +174,20 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         /** Not to confuse with token#4 instead used for If-Modified-Since header. */
         case 3:
-            valid = is_valid(token, HTTP_DATE_REGEX);
-            if (valid) {
+            if (is_valid(token, HTTP_DATE_REGEX)) {
+                valid = true;
+                request->if_modified_str_type = 1;
                 (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else if (is_valid(token, RFC_850_DATE_REGEX)) {
+                valid=true;
+                request->if_modified_str_type = 2;
+                (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else if (is_valid(token, ASCTIME_DATE_REGEX)) {
+                valid=true;
+                request->if_modified_str_type = 3;
+                (void)strncpy(request->if_modified_since, token, strlen(token));
+            } else {
+                valid=false;
             }
             break;
         default:
@@ -201,12 +212,7 @@ void reset_request_object(REQUEST* request) {
     bzero(request->path, sizeof(request->path));
     bzero(request->protocol, sizeof(request->protocol));
     bzero(request->version, sizeof(request->version));
+    request->if_modified_str_type = 0;
+    request->if_modified_t = 0;
+    request->time_request_made = 0;
 }
-
-// bool validate_URL(char* URL) {
-    /**
-     * 1. http[s]://chutiyapa/--this is what we need
-     * 2. Direct path /../../../
-     * 3. Starts with / */
-    
-// }

@@ -1,1 +1,1 @@
-curl --http1.0 -v --location --request GET 'http://localhost:65495/' --header 'sad: sad'
+curl --http1.0 -v --location --request GET 'http://localhost:8080/' --header 'sad: sad'

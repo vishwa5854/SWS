@@ -152,17 +152,30 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         char* buf[INT_MAX];
         int count = 0;
 	    while ((dirp = readdir(dir)) != NULL) {
-	    if (strncmp(dirp->d_name, ".", 1) != 0) {
-            if ((buf[count] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
-                send_error(500, fd, is_valid_request, response, response_string);
-                close_connection(fd);
+            if (strncmp(dirp->d_name, ".", 1) != 0) {
+                count++;
             }
-            if (strncpy(buf[count], dirp->d_name, strlen(dirp->d_name)) == NULL) {
-                send_error(500, fd, is_valid_request, response, response_string);
-                close_connection(fd);
-            }
-            count++;
-            }
+        }
+        if ((buf = malloc(count * sizeof(char*))) == NULL) {
+            send_error(500, is_valid_request, response, response_string);
+            close_connection(fd);
+        }
+        if ((dir = opendir(finalpath)) == NULL) {
+            send_error(401, fd, is_valid_request, response, response_string);
+            close_connection(fd);
+        }
+        while ((dirp = readdir(dir)) != NULL) {
+            if (strncmp(dirp->d_name, ".", 1) != 0) {
+                if ((buf[count] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
+                    send_error(500, fd, is_valid_request, response, response_string);
+                    close_connection(fd);
+                }
+                if (strncpy(buf[count], dirp->d_name, strlen(dirp->d_name)) == NULL) {
+                    send_error(500, fd, is_valid_request, response, response_string);
+                    close_connection(fd);
+                }
+                count++;
+                }
         }
         sort(buf, count + 1);
         response->status_code = 200;

@@ -16,6 +16,20 @@
 #include "structures.h"
 #include "util.h"
 
+int compare_strings(const char* a, const char* b) {
+    int len1 = strlen(a);
+    int len2 = strlen(b);
+    if (len1 < len2) {
+        return strncmp(a, b, len1);
+    }
+    return strcmp(b, a, len2);
+}
+ 
+// Function to sort String array
+void sort(const char** arr, int n) {
+    qsort(arr, n, sizeof(const char*), compare_strings);
+}
+
 void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bool is_valid_request, RESPONSE* response,
               char* response_string) {
     char path[PATH_MAX];
@@ -129,27 +143,41 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 		    write(fd, line, strlen(line));
             }
 	    write(fd, "\n", strlen("\n"));
+        free(line);
     } else {
+        char** buf;
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
         response->status_code = 200;
         send_headers(fd, is_valid_request, response, response_string);
-    
+        int count = 0;
 	    while ((dirp = readdir(dir)) != NULL) {
 	    if (strncmp(dirp->d_name, ".", 1) != 0) {
-                (void)write(fd, dirp->d_name, strlen(dirp->d_name));
-		write(fd, "\n", strlen("\n"));
+            if ((buf[i] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
+                send_error(500, fd, is_valid_request, response, response_string);
+                close_connection(fd);
+            }
+            if (strncpy(buf[i], dirp->d_name, strlen(dirp->d_name)) == NULL) {
+                send_error(500, fd, is_valid_request, response, response_string);
+                close_connection(fd);
+            }
+            count++;
             }
         }
+        sort(buf, count + 1);
+        int i;
+        for (i = 0; i <= count; i++) {
+            if (write(fd, buf[i], strlen(buf[i])) == -1) {
+                close_connection(fd);
+            }
+            if (write(fd, "\n", strlen("\n")) == -1) {
+                close_connection(fd);
+            }
+        }
+        free(buf);
     }
-	free(last_modified_time);
-	free(line);
-	free(indexfile);
-	free(finalpath);
-	free(path);
-	free(realworkingdir);
 	close_connection(fd);
 }
 

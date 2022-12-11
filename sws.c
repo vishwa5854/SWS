@@ -110,11 +110,7 @@ void selectSocket(int socket, struct flags_struct flags) {
     to.tv_sec = SLEEP_FOR;
     to.tv_usec = 0;
 
-    if (flags.d_flag) {
-        select_return = select(socket + 1, &ready, 0, 0, NULL);
-    } else {
-        select_return = select(socket + 1, &ready, 0, 0, &to);
-    }
+    select_return = select(socket + 1, &ready, 0, 0, &to);
 
     if (select_return < 0) {
         if (errno != EINTR) {
@@ -145,7 +141,7 @@ int main(int argc, char **argv) {
         switch (opt) {
             case 'c':
                 (void)strncpy(flags.cdi_dir_arg, optarg, PATH_MAX);
-                flags.cdi_dir_arg[PATH_MAX + 1] = '\0';
+                flags.cdi_dir_arg[PATH_MAX] = '\0';
                 flags.c_flag = 1;
                 break;
             case 'd':
@@ -155,18 +151,18 @@ int main(int argc, char **argv) {
                 printUsage(argv[0]);
                 return EXIT_SUCCESS;
             case 'i':
-                (void)strncpy(flags.addr_arg, optarg, IPV6_MAXSTRLEN - 1);
-                flags.addr_arg[45] = '\0';
+                (void)strncpy(flags.addr_arg, optarg, IPV6_MAXSTRLEN);
+                flags.addr_arg[IPV6_MAXSTRLEN] = '\0';
                 flags.i_flag = 1;
                 break;
             case 'l':
                 (void)strncpy(flags.log_file_arg, optarg, PATH_MAX);
-                flags.log_file_arg[PATH_MAX + 1] = '\0';
+                flags.log_file_arg[PATH_MAX] = '\0';
                 flags.l_flag = 1;
                 break;
             case 'p':
                 strncpy(flags.port_arg, optarg, PORT_MAXSTRLEN);
-                flags.port_arg[PORT_MAXSTRLEN + 1] = '\0';
+                flags.port_arg[PORT_MAXSTRLEN] = '\0';
                 flags.p_flag = 1;
                 break;
             case '?':
@@ -185,13 +181,16 @@ int main(int argc, char **argv) {
     }
 
     (void)strncpy(flags.argument_path, argv[0], PATH_MAX);
-    flags.argument_path[PATH_MAX + 1] = '\0';
+    flags.argument_path[PATH_MAX] = '\0';
 
-    /** If no -p flag provided, set port to 8080 by default */
-    (void)strncpy(flags.port_arg, DEFAULT_PORT,
-                  strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
-    flags.port_arg[PORT_MAXSTRLEN + 1] = '\0';
-    flags.p_flag = 1;
+    if (!flags.p_flag) {
+            /** If no -p flag provided, set port to 8080 by default */
+        (void)strncpy(flags.port_arg, DEFAULT_PORT,
+                    strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
+        flags.port_arg[PORT_MAXSTRLEN + 1] = '\0';
+        flags.p_flag = 1;
+    }
+
     int socket;
 
     if (flags.p_flag) {
@@ -211,7 +210,6 @@ int main(int argc, char **argv) {
 
     if (!flags.d_flag) {
         int daemon_ret;
-
         if ((daemon_ret = daemon(0, 0)) == -1) {
             perror("daemon");
             return EXIT_FAILURE;

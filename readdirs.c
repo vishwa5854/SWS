@@ -145,13 +145,11 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 	    write(fd, "\n", strlen("\n"));
         free(line);
     } else {
-        char** buf;
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
-        response->status_code = 200;
-        send_headers(fd, is_valid_request, response, response_string);
+        char* buf[INT_MAX];
         int count = 0;
 	    while ((dirp = readdir(dir)) != NULL) {
 	    if (strncmp(dirp->d_name, ".", 1) != 0) {
@@ -167,6 +165,8 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             }
         }
         sort(buf, count + 1);
+        response->status_code = 200;
+        send_headers(fd, is_valid_request, response, response_string);
         int i;
         for (i = 0; i <= count; i++) {
             if (write(fd, buf[i], strlen(buf[i])) == -1) {
@@ -180,3 +180,4 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
     }
 	close_connection(fd);
 }
+

@@ -21,8 +21,11 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
     char path[PATH_MAX];
     char realworkingdir[PATH_MAX];
 
+    bzero(path, PATH_MAX);
+    bzero(realworkingdir, PATH_MAX);
+
     if ((realpath(workingdir, realworkingdir)) == NULL) {
-	    send_error(500, fd, is_valid_request, response, response_string);
+	    send_error(404, fd, is_valid_request, response, response_string);
 	    close_connection(fd);
     }
 
@@ -141,11 +144,12 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             }
         }
     }
+	free(last_modified_time);
+	free(line);
+	free(indexfile);
+	free(finalpath);
+	free(path);
+	free(realworkingdir);
 	close_connection(fd);
 }
 
-int main(int argc, char** argv) {
-	RESPONSE response;
-	readdirs(argv[1],argv[2], STDOUT_FILENO, 0, true, &response, "OK");
-	return(0);
-}

@@ -77,4 +77,9 @@ void getuserdir(char* userstr, int fd, time_t modified_since, bool is_valid_requ
             (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
     }
         readdirs(swsdir, workingdir, fd, modified_since, is_valid_request, response, response_string);
+	free(swsdir);
+	free(workingdir);
+	free(userdir);
+	free(username);
+	free(requestedContent);
 }

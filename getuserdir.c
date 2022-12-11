@@ -73,12 +73,8 @@ void getuserdir(char* userstr, int fd, time_t modified_since, bool is_valid_requ
     (void)strncpy(swsdir, userdir, userdirlen);
     (void)strncat(swsdir, "/sws/", SWS_LEN);
     (void)strncpy(workingdir, swsdir, strlen(swsdir));
-    if (requestedContent != NULL) {
-            (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
+    if (requestedContent == NULL) {
+           requestedContent = ".";
     }
-        readdirs(swsdir, workingdir, fd, modified_since, is_valid_request, response, response_string);
-	free(swsdir);
-	free(userdir);
-	free(username);
-	free(requestedContent);
+        readdirs(requestedContent, workingdir, fd, modified_since, is_valid_request, response, response_string);
 }

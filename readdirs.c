@@ -17,17 +17,7 @@
 #include "util.h"
 
 int compare_strings(const void* a, const void* b) {
-    int len1 = strlen(a);
-    int len2 = strlen(b);
-    if (len1 < len2) {
-        return strncmp(a, b, len1);
-    }
-    return strncmp(b, a, len2);
-}
- 
-// Function to sort String array
-void sort(char** arr, int n) {
-    qsort(arr, n, sizeof(char*), compare_strings);
+    return strcmp(*(const char**)a, *(const char**)b);
 }
 
 void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bool is_valid_request, RESPONSE* response,
@@ -37,6 +27,8 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 
     bzero(path, PATH_MAX);
     bzero(realworkingdir, PATH_MAX);
+
+
 
     if ((realpath(workingdir, realworkingdir)) == NULL) {
 	    send_error(404, fd, is_valid_request, response, response_string);
@@ -53,13 +45,6 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 	    }
     }
 
-    if (strncmp(dirname, realworkingdir, realworkingdirlen - 1) == 0) {
-	    if (strncpy(path, dirname, strlen(dirname)) == NULL) {
-		    send_error(500, fd, is_valid_request, response, response_string);
-		    close_connection(fd);
-	    }
-    }
-    else {
         if (strncpy(path, realworkingdir, realworkingdirlen) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);
             close_connection(fd);
@@ -68,7 +53,6 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             send_error(500, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
-    }
 
     char finalpath[PATH_MAX];
 
@@ -149,7 +133,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             send_error(401, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
-        char* buf[INT_MAX];
+        char** buf;
         int count = 0;
 	    while ((dirp = readdir(dir)) != NULL) {
             if (strncmp(dirp->d_name, ".", 1) != 0) {
@@ -157,31 +141,31 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             }
         }
         if ((buf = malloc(count * sizeof(char*))) == NULL) {
-            send_error(500, is_valid_request, response, response_string);
+            send_error(500,fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
+	int i = 0;
         while ((dirp = readdir(dir)) != NULL) {
             if (strncmp(dirp->d_name, ".", 1) != 0) {
-                if ((buf[count] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
+                if ((buf[i] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
                     close_connection(fd);
                 }
-                if (strncpy(buf[count], dirp->d_name, strlen(dirp->d_name)) == NULL) {
+                if (strncpy(buf[i], dirp->d_name, strlen(dirp->d_name)) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
                     close_connection(fd);
                 }
-                count++;
+		i = i + 1;
                 }
         }
-        sort(buf, count + 1);
+        qsort(buf, count, sizeof(char*), compare_strings);
         response->status_code = 200;
         send_headers(fd, is_valid_request, response, response_string);
-        int i;
-        for (i = 0; i <= count; i++) {
+        for (i = 0; i < count; i++) {
             if (write(fd, buf[i], strlen(buf[i])) == -1) {
                 close_connection(fd);
             }
@@ -193,4 +177,3 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
     }
 	close_connection(fd);
 }
-

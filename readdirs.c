@@ -19,12 +19,7 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
     char path[PATH_MAX];
     char realworkingdir[PATH_MAX];
 
-    puts("****");
-    puts(dirname);
-    puts(workingdir);
-
     if ((realpath(workingdir, realworkingdir)) == NULL) {
-        puts("23");
 	    send_error(500, fd, is_valid_request, response, response_string);
 	    return;
     }
@@ -34,54 +29,37 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
     if (realworkingdir[realworkingdirlen - 1] != '/') {
         realworkingdirlen++;
 	    if (strncat(realworkingdir, "/", strlen("/")) == NULL) {
-            puts("23");
 		    send_error(500, fd, is_valid_request, response, response_string);
 		    return;
 	    }
     }
 
-    puts(dirname);
-    puts(realworkingdir);
-
     if (strncmp(dirname, realworkingdir, realworkingdirlen - 1) == 0) {
 	    if (strncpy(path, dirname, strlen(dirname)) == NULL) {
-            puts("23");
 		    send_error(500, fd, is_valid_request, response, response_string);
 		    return;
 	    }
     }
     else {
         if (strncpy(path, realworkingdir, realworkingdirlen) == NULL) {
-            puts("23");
             send_error(500, fd, is_valid_request, response, response_string);
             return;
         }
-        puts(path);
         if (strncat(path, dirname, strlen(dirname)) == NULL) {
-            puts("23");
             send_error(500, fd, is_valid_request, response, response_string);
             return;
         }
-        puts(path);
     }
 
     char finalpath[PATH_MAX];
 
     if (realpath(path, finalpath) == NULL) {
-        puts("........");
-        puts(path);
-        puts(finalpath);
         send_error(404, fd, is_valid_request, response, response_string);
         return;
     }
-    puts(finalpath);
 
-    puts("********");
 
     if (strncmp(finalpath, realworkingdir, realworkingdirlen - 1) != 0) {
-        puts(finalpath);
-        puts(realworkingdir);
-        puts("*****");
         send_error(401, fd, is_valid_request, response, response_string);
         return;
     }
@@ -121,9 +99,7 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
         char* line = NULL;
         size_t linesize = 0;
     
-        puts("Here");
 	    while ((temp = getline(&line, &linesize, fp)) != -1) {
-            puts("Hereasdas");
 		    write(fd, line, strlen(line));
             }
 	    write(fd, "\n", strlen("\n"));
@@ -132,6 +108,7 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
             send_error(401, fd, is_valid_request, response, response_string);
             return;
         }
+	send_headers(fd, is_valid_request, response, response_string);
     
 	    while ((dirp = readdir(dir)) != NULL) {
 	    if (strncmp(dirp->d_name, ".", 1) != 0) {
@@ -140,4 +117,5 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
             }
         }
     }
+	close_connection(fd);
 }

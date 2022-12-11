@@ -17,77 +17,95 @@
 void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RESPONSE* response,
               char* response_string) {
     char path[PATH_MAX];
+    char realworkingdir[PATH_MAX];
 
-    int workingdirlen = strlen(workingdir);
+    puts("****");
+    puts(dirname);
+    puts(workingdir);
 
-    char* realworkingdir = NULL;
-
-    struct stat sb;
-
-    if (stat(dirname, &sb) != 0) {
-          send_error(401, fd, is_valid_request, response, response_string);
-          return;
+    if ((realpath(workingdir, realworkingdir)) == NULL) {
+        puts("23");
+	    send_error(500, fd, is_valid_request, response, response_string);
+	    return;
     }
 
-    int isDir = S_ISDIR(sb.st_mode); 
+    int realworkingdirlen = strlen(realworkingdir);
 
-    if (workingdir[workingdirlen - 1] != '/' && isDir) {
-	    if ((realworkingdir = malloc((workingdirlen + 1) * sizeof(char*))) == NULL) {
-		    send_error(500, fd, is_valid_request, response, response_string);
-		    return;
-	    }
+    if (realworkingdir[realworkingdirlen - 1] != '/') {
+        realworkingdirlen++;
 	    if (strncat(realworkingdir, "/", strlen("/")) == NULL) {
+            puts("23");
 		    send_error(500, fd, is_valid_request, response, response_string);
 		    return;
 	    }
     }
 
-    if (realworkingdir == NULL) {
-	    if (strncpy(realworkingdir, workingdir, workingdirlen) == NULL) {
+    puts(dirname);
+    puts(realworkingdir);
+
+    if (strncmp(dirname, realworkingdir, realworkingdirlen - 1) == 0) {
+	    if (strncpy(path, dirname, strlen(dirname)) == NULL) {
+            puts("23");
 		    send_error(500, fd, is_valid_request, response, response_string);
 		    return;
 	    }
     }
+    else {
+        if (strncpy(path, realworkingdir, realworkingdirlen) == NULL) {
+            puts("23");
+            send_error(500, fd, is_valid_request, response, response_string);
+            return;
+        }
+        puts(path);
+        if (strncat(path, dirname, strlen(dirname)) == NULL) {
+            puts("23");
+            send_error(500, fd, is_valid_request, response, response_string);
+            return;
+        }
+        puts(path);
+    }
 
-    if (realpath(dirname, path) == NULL) {
+    char finalpath[PATH_MAX];
+
+    if (realpath(path, finalpath) == NULL) {
+        puts("........");
+        puts(path);
+        puts(finalpath);
         send_error(404, fd, is_valid_request, response, response_string);
         return;
     }
-    
-          /* Lock user in the current working directory */
-    if (strncmp(path, realworkingdir, strlen(realworkingdir)) != 0) {
-            bzero(path, strlen(path));
-            if (strncpy(path, realworkingdir, strlen(realworkingdir)) == NULL) {
-                    send_error(500, fd, is_valid_request, response, response_string);
-                    return;
-            }
-            if (strncat(path, dirname, strlen(dirname)) == NULL) {
-                    send_error(500, fd, is_valid_request, response, response_string);
-                    return;
-            }
+    puts(finalpath);
 
+    puts("********");
 
-            if (realpath(path, path) == NULL) {
-                    send_error(404, fd, is_valid_request, response, response_string);
-                    return;
-            }
-
-            if (strncmp(path, realworkingdir, strlen(realworkingdir)) != 0) {
-                    send_error(401, fd, is_valid_request, response, response_string);
-                    return;
-            }
+    if (strncmp(finalpath, realworkingdir, realworkingdirlen - 1) != 0) {
+        puts(finalpath);
+        puts(realworkingdir);
+        puts("*****");
+        send_error(401, fd, is_valid_request, response, response_string);
+        return;
     }
+
+    struct stat sb;
+
+    if (stat(finalpath, &sb) < 0) {
+        send_error(401, fd, is_valid_request, response, response_string);
+        return;
+    }
+
+    int isDir = S_ISDIR(sb.st_mode);
+ 
     DIR* dir;
     struct dirent* dirp;
-    int dirlen = strlen(dirname);
-    char indexfile[dirlen + INDEX_SIZE];
+    int pathlen = strlen(finalpath);
+    char indexfile[pathlen + INDEX_SIZE];
     /* Doing a +1 for termination with \0*/
-    (void)strncpy(indexfile, dirname, dirlen + 1);
+    (void)strncpy(indexfile, finalpath, pathlen + 1);
     (void)strncat(indexfile, "/index.html", INDEX_SIZE - 1);
 	if (access(indexfile, R_OK) == 0 || !isDir) {
         FILE* fp;
         if (!isDir) {
-            if ((fp = fopen(dirname, "r")) == NULL) {
+            if ((fp = fopen(finalpath, "r")) == NULL) {
                 send_error(401, fd, is_valid_request, response,
                            response_string);
                 return;
@@ -103,12 +121,14 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
         char* line = NULL;
         size_t linesize = 0;
     
+        puts("Here");
 	    while ((temp = getline(&line, &linesize, fp)) != -1) {
+            puts("Hereasdas");
 		    write(fd, line, strlen(line));
             }
 	    write(fd, "\n", strlen("\n"));
     } else {
-        if ((dir = opendir(dirname)) == NULL) {
+        if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
             return;
         }

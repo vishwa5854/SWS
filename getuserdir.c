@@ -26,6 +26,7 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
     for (i = 0; i < userstrlen; i++) {
         if (userstr[i] == '/') {
             if ((username = malloc((i + 1) * sizeof(char*))) == NULL) {
+                puts("29");
                 send_error(500, fd, is_valid_request, response,
                            response_string);
                 return;
@@ -33,10 +34,11 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
 
             if ((requestedContent =
                      malloc((userstrlen - i - 1) * sizeof(char*))) == NULL) {
+                        puts("37");
                 send_error(500, fd, is_valid_request, response,
                            response_string);
                 return;
-            }
+                            }
             (void)strncpy(username, userstr, i);
             (void)strncpy(requestedContent, userstr + i + 1,
                           userstrlen - i - 1);
@@ -45,11 +47,12 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
     }
     /* Doing this for the case when the request only contains a username without / */
     if (username == NULL && userstrlen != 0) {
-	    if ((username = malloc(userstrlen * sizeof(char*))) == NULL) {
-		    send_error(500, fd, is_valid_request, response, response_string);
-		    return;
-	    }
-	    (void)strncpy(username, userstr, userstrlen);
+            if ((username = malloc(userstrlen * sizeof(char*))) == NULL) {
+                    puts("51");
+                    send_error(500, fd, is_valid_request, response, response_string);
+                    return;
+            }
+            (void)strncpy(username, userstr, userstrlen);
     }
 
     struct passwd* p;
@@ -59,18 +62,22 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
         return;
     }
     char* userdir = p->pw_dir;
+    char workingdir[PATH_MAX];
+    bzero(workingdir, PATH_MAX);
     int userdirlen = strlen(userdir);
     int swsdirlen = userdirlen + SWS_LEN + userstrlen - i - 1;
     char* swsdir;
-    
-	if ((swsdir = malloc(swsdirlen * sizeof(char*))) == NULL) {
+
+        if ((swsdir = malloc(swsdirlen * sizeof(char*))) == NULL) {
+        puts("71");
         send_error(500, fd, is_valid_request, response, response_string);
         return;
     }
     (void)strncpy(swsdir, userdir, userdirlen);
     (void)strncat(swsdir, "/sws/", SWS_LEN);
+    (void)strncpy(workingdir, swsdir, strlen(swsdir));
     if (requestedContent != NULL) {
-	    (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
+            (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
     }
-    readdirs(swsdir, userdir, fd, is_valid_request, response, response_string);
+        readdirs(swsdir, workingdir, fd, is_valid_request, response, response_string);
 }

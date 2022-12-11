@@ -95,7 +95,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
                 close_connection(fd);
             }
         } else {
-            if (stat(indexfile, &sb) == NULL) {
+            if (stat(indexfile, &sb) < 0) {
                 send_error(401, fd ,is_valid_request, response, response_string);
                 close_connection(fd);
             }
@@ -113,7 +113,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         char* line = NULL;
         size_t linesize = 0;
 
-        char* last_modified_time[DATE_MAX_LEN];
+        char last_modified_time[DATE_MAX_LEN];
         get_gmt_date_str(last_modified_time, DATE_MAX_LEN);
         if (strncpy(response->last_modified, last_modified_time, DATE_MAX_LEN) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);

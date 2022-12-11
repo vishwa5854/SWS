@@ -9,19 +9,20 @@
 #include <string.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "handler.h"
 #include "structures.h"
 
-void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RESPONSE* response,
+void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bool is_valid_request, RESPONSE* response,
               char* response_string) {
     char path[PATH_MAX];
     char realworkingdir[PATH_MAX];
 
     if ((realpath(workingdir, realworkingdir)) == NULL) {
 	    send_error(500, fd, is_valid_request, response, response_string);
-	    return;
+	    close_connection(fd);
     }
 
     int realworkingdirlen = strlen(realworkingdir);
@@ -30,24 +31,24 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
         realworkingdirlen++;
 	    if (strncat(realworkingdir, "/", strlen("/")) == NULL) {
 		    send_error(500, fd, is_valid_request, response, response_string);
-		    return;
+		    close_connection(fd);
 	    }
     }
 
     if (strncmp(dirname, realworkingdir, realworkingdirlen - 1) == 0) {
 	    if (strncpy(path, dirname, strlen(dirname)) == NULL) {
 		    send_error(500, fd, is_valid_request, response, response_string);
-		    return;
+		    close_connection(fd);
 	    }
     }
     else {
         if (strncpy(path, realworkingdir, realworkingdirlen) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);
-            return;
+            close_connection(fd);
         }
         if (strncat(path, dirname, strlen(dirname)) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);
-            return;
+            close_connection(fd);
         }
     }
 
@@ -55,20 +56,20 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
 
     if (realpath(path, finalpath) == NULL) {
         send_error(404, fd, is_valid_request, response, response_string);
-        return;
+        close_connection(fd);
     }
 
 
     if (strncmp(finalpath, realworkingdir, realworkingdirlen - 1) != 0) {
         send_error(401, fd, is_valid_request, response, response_string);
-        return;
+        close_connection(fd);
     }
 
     struct stat sb;
 
     if (stat(finalpath, &sb) < 0) {
         send_error(401, fd, is_valid_request, response, response_string);
-        return;
+        close_connection(fd);
     }
 
     int isDir = S_ISDIR(sb.st_mode);
@@ -83,16 +84,28 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
 	if (access(indexfile, R_OK) == 0 || !isDir) {
         FILE* fp;
         if (!isDir) {
+            if (sb.st_mtim < modified_since) {
+                send_error(304, fd, is_valid_request, response, response_string);
+                close_connection(fd);
+            }
             if ((fp = fopen(finalpath, "r")) == NULL) {
                 send_error(401, fd, is_valid_request, response,
                            response_string);
-                return;
+                close_connection(fd);
             }
         } else {
+            if (stat(indexfile, &sb) == NULL) {
+                send_error(401, fd ,is_valid_request, response, response_string);
+                close_connection(fd);
+            }
+            if (sb.st_mtim < modified_since) {
+                send_error(304, fd, is_valid_request, response, response_string);
+                close_connection(fd);
+            }
             if ((fp = fopen(indexfile, "r")) == NULL) {
                 send_error(401, fd, is_valid_request, response,
                            response_string);
-                return;
+                close_connection(fd);
             }
         }
         ssize_t temp;
@@ -106,7 +119,7 @@ void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RE
     } else {
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
-            return;
+            close_connection(fd);
         }
 	send_headers(fd, is_valid_request, response, response_string);
     

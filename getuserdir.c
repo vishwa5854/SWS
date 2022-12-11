@@ -28,14 +28,14 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
             if ((username = malloc((i + 1) * sizeof(char*))) == NULL) {
                 send_error(500, fd, is_valid_request, response,
                            response_string);
-                return;
+                close_connection(fd);
             }
 
             if ((requestedContent =
                      malloc((userstrlen - i - 1) * sizeof(char*))) == NULL) {
                 send_error(500, fd, is_valid_request, response,
                            response_string);
-                return;
+                close_connection(fd);
                             }
             (void)strncpy(username, userstr, i);
             (void)strncpy(requestedContent, userstr + i + 1,
@@ -47,7 +47,7 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
     if (username == NULL && userstrlen != 0) {
             if ((username = malloc(userstrlen * sizeof(char*))) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
-                    return;
+                    close_connection(fd);
             }
             (void)strncpy(username, userstr, userstrlen);
     }
@@ -56,7 +56,7 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
 
     if ((p = getpwnam(username)) == NULL) {
         send_error(404, fd, is_valid_request, response, response_string);
-        return;
+        close_connection(fd);
     }
     char* userdir = p->pw_dir;
     char workingdir[PATH_MAX];
@@ -67,7 +67,7 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
 
         if ((swsdir = malloc(swsdirlen * sizeof(char*))) == NULL) {
         send_error(500, fd, is_valid_request, response, response_string);
-        return;
+        close_connection(fd);
     }
     (void)strncpy(swsdir, userdir, userdirlen);
     (void)strncat(swsdir, "/sws/", SWS_LEN);

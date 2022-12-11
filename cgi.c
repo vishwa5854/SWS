@@ -9,60 +9,165 @@
 #include <sys/types.h>
 #include <errno.h>
 #include "handler.h"
+#include <limits.h>
+#include "flags.h"
 #include "cgi.h"
+
 
 #define BUFFER_SIZE 64
 // TODO add all the code inside the while and send return to socket
 // TODO check whether the file has permission to execute the file 
 // TODO check whether the files are in the same parent directory 
 
-int execute_file(const char *executable_path, int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string)
+
+int get_real_path(const char * orginal_path,char *resolved_path){
+ 
+    if(realpath(orginal_path,resolved_path)==NULL){
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
+int execute_file(const char *executable_path, int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string,struct flags_struct flags)
 {
+
+    char resolved_path_of_starting[PATH_MAX];
+    char resolved_path_of_executable_path[PATH_MAX];
+    
+    if ((get_real_path(flags.cdi_dir_arg,resolved_path_of_starting))==0){
+         send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+    
+
+    
+   
+    (void)flags;
     (void)socket_fd;
     char temp_buff[BUFSIZ];
     int fd_out[2];
     int n_chars = 0;
-    
+    int flag=0;
     const char* Query_String="QUERY_STRING=";
     const char* combined_query_string;
     const char* executable_path_after_strtok;
+    // char *last;
     const char* parameters;
-
+    
+    if(strstr(executable_path,"?")==NULL){
+        flag=0;
+    }
+    else{
+        flag=1;
+    }
+   
     executable_path_after_strtok=strtok((char *)executable_path,"?");
-    
-    parameters=strtok(NULL,"?");
-    
-    if (parameters == NULL)
-    {
+   
+    if(flag==0){
         parameters="";
+    }
+    else{
+        parameters=strtok(NULL,"?");
+    }
+    
+    char * parameters_array=malloc(sizeof(char)*(strlen(parameters)+1));
+
+    if(parameters!=NULL){
+    strncpy(parameters_array,parameters,strlen(parameters));
+    }
+    else{
+       strncpy(parameters_array,"",strlen("")+1);
+    }
+
+    
+    /* replace --> realpath --> compare */
+    
+    /*code for replacement of /cgi-bin/ with the home -c option path */
+   
+    char find_string[]="/cgi-bin";
+
+    char * variable_executable_path= malloc(sizeof(char)*(strlen(executable_path_after_strtok)+1));
+
+    variable_executable_path=(char*)executable_path_after_strtok;
+
+    char *where_is_cgi=strstr(variable_executable_path,find_string);
+    
+    char * resolved_path_starting_bak=malloc(sizeof(char)*(strlen(resolved_path_of_starting)+1));
+    strncpy(resolved_path_starting_bak,resolved_path_of_starting,strlen(resolved_path_of_starting));
+
+    printf("\n resolved path 1 ---- %s ----\n", resolved_path_of_starting);
+    // // char buffer_for_string_manipulation[strlen(variable_executable_path)+1];
+    if(where_is_cgi){
+        strncat(resolved_path_of_starting,where_is_cgi+strlen(find_string),strlen(where_is_cgi+strlen(find_string)));
+        strncpy(where_is_cgi,resolved_path_of_starting,strlen(resolved_path_of_starting));
+        where_is_cgi[strlen(resolved_path_of_starting)]='\0';
+    }
+    /* end of manipulation of code */
+  
+    printf("\n resolved path 2 ---- %s ----\n", resolved_path_of_starting);
+      if ((get_real_path(variable_executable_path,resolved_path_of_executable_path))==0){
+    
+        send_error(404, socket_fd, is_valid_request, response, response_string);
+    }
+    
+    
+    
+    if (parameters_array == NULL)
+    {
+        parameters_array="";
         if((combined_query_string = malloc(strlen(Query_String) * sizeof(char)))==NULL){
             send_error(500, socket_fd, is_valid_request, response, response_string);
         }
         combined_query_string = strncpy((char * restrict)combined_query_string, (char * restrict)Query_String,strlen(Query_String));
     }
     else{
-         if ((combined_query_string=malloc(sizeof(char)*(strlen(Query_String)+strlen(parameters))))==NULL){
+         if ((combined_query_string=malloc(sizeof(char)*(strlen(Query_String)+strlen(parameters_array))))==NULL){
             send_error(500, socket_fd, is_valid_request, response, response_string);
         }
         strncpy((char * restrict)combined_query_string,(char * restrict)Query_String,strlen(Query_String));//TODO check for return values on the same
-        strlcat((char * restrict)combined_query_string,(char * restrict)parameters,strlen(parameters)+strlen(combined_query_string)+1);//Rough POC//TODO check for return values on the same
+        strlcat((char * restrict)combined_query_string,(char * restrict)parameters_array,strlen(parameters_array)+strlen(combined_query_string)+1);//Rough POC//TODO check for return values on the same
     }
     char *envp[]={(char *)combined_query_string,0};
 
     free((void *)combined_query_string);
 
     /* Check if file exsists and has executable permission with the respective error codes*/
-    if(access(executable_path_after_strtok,F_OK)==-1){
+    printf(" \n Reached here -1 \n");
+    printf("\n %s  \n ",resolved_path_of_executable_path);
+    if(access(resolved_path_of_executable_path,F_OK)==-1){
+        printf("\n in here \n");
         send_error(404, socket_fd, is_valid_request, response, response_string);
     }
-    if(access(executable_path_after_strtok,X_OK)){
+
+    if(access(resolved_path_of_executable_path,X_OK)){
+        printf("\n in here 10 \n");
         send_error(401, socket_fd, is_valid_request, response, response_string);
     }
-    
+
     //end testing code
+    
+  
+    /* End of abs code */
+    
+    /* Starting on comparing */
+    printf("\n ---- %s ----\n", resolved_path_of_executable_path);
+    printf("\n resolved path ---- %s ----\n", resolved_path_of_starting);
+    printf("\n resolved_path_starting_bak %s ---- \n",resolved_path_starting_bak);
+    if(strstr(resolved_path_of_executable_path,resolved_path_starting_bak)==NULL){
+        printf("\n in here 11 \n");
+         send_error(401, socket_fd, is_valid_request, response, response_string);
+    } 
+    free(resolved_path_starting_bak);
+    printf(" \n Reached here -2 \n");  
+    /* End of comparing code*/
 
+    /*code for checking the paths given by the user with realpath*/
 
+    /* Code for converting the given request path to realpath */
 
+    
+    printf("\n This is resolved path %s \n",resolved_path_of_executable_path);
     sigset_t blockMask, origMask;
     // int flag=0;
 
@@ -133,12 +238,12 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
             // execve(executable_path,args,envp);//Working
 
             (void)close(fd_out[1]);
-
-            if (execve(executable_path_after_strtok, args, envp) == -1) {
+            
+            if (execve(resolved_path_of_executable_path, args, envp) == -1) {
                 printf("Execve() Not able to run this");
                 send_error(500, socket_fd, is_valid_request, response, response_string);
             }
-
+            free(variable_executable_path);
             puts("Below the execve call");
 
             printf("\n%d\n",errno);
@@ -212,5 +317,7 @@ int execute_file(const char *executable_path, int socket_fd, bool is_valid_reque
 
     return status;
 }
+
+
 
 // int data(){}

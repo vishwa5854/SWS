@@ -111,10 +111,10 @@ void send_error(int status_code, int socket_fd, bool is_valid_request, RESPONSE 
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
-void handleConnection(int fd, struct sockaddr_in6 client) {
+void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct flags) {
     const char *rip;
     char claddr[INET6_ADDRSTRLEN];
-
+    
     if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
         perror("inet_ntop");
     } else {
@@ -205,7 +205,7 @@ void handleConnection(int fd, struct sockaddr_in6 client) {
     }
 
     /** Testing for now, calling the CGI bruh */
-    execute_file(request.path, fd, is_valid_request, &response, response_string);
+    execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
 
 //    send_headers(fd, is_valid_request, &response, response_string);
 //
@@ -229,7 +229,7 @@ void handleSocket(int socket, struct flags_struct flags) {
     }
 
     if (flags.d_flag) {
-        handleConnection(fd, client);
+        handleConnection(fd, client,flags);
         exit(EXIT_SUCCESS);
     }
 
@@ -240,6 +240,6 @@ void handleSocket(int socket, struct flags_struct flags) {
         current_fd = fd;
         signal(SIGALRM, alarm_handler);
         alarm(TIMEOUT);
-        handleConnection(fd, client);
+        handleConnection(fd, client,flags);
     }
 }

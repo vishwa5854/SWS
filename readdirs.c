@@ -22,12 +22,12 @@ int compare_strings(const char* a, const char* b) {
     if (len1 < len2) {
         return strncmp(a, b, len1);
     }
-    return strcmp(b, a, len2);
+    return strncmp(b, a, len2);
 }
  
 // Function to sort String array
-void sort(const char** arr, int n) {
-    qsort(arr, n, sizeof(const char*), compare_strings);
+void sort(char** arr, int n) {
+    qsort(arr, n, sizeof(char*), compare_strings);
 }
 
 void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bool is_valid_request, RESPONSE* response,
@@ -180,4 +180,3 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
     }
 	close_connection(fd);
 }
-

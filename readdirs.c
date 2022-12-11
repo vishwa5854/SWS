@@ -14,24 +14,50 @@
 #include "handler.h"
 #include "structures.h"
 
-void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
-              char* response_string, bool flag) {
+void readdirs(char* dirname, char* workingdir, int fd, bool is_valid_request, RESPONSE* response,
+              char* response_string) {
     char path[PATH_MAX];
+
+    int workingdirlen = strlen(workingdir);
+
+    char* realworkingdir = NULL;
+
+    struct stat sb;
+
+    if (stat(dirname, &sb) != 0) {
+          send_error(401, fd, is_valid_request, response, response_string);
+          return;
+    }
+
+    int isDir = S_ISDIR(sb.st_mode); 
+
+    if (workingdir[workingdirlen - 1] != '/' && isDir) {
+	    if ((realworkingdir = malloc((workingdirlen + 1) * sizeof(char*))) == NULL) {
+		    send_error(500, fd, is_valid_request, response, response_string);
+		    return;
+	    }
+	    if (strncat(realworkingdir, "/", strlen("/")) == NULL) {
+		    send_error(500, fd, is_valid_request, response, response_string);
+		    return;
+	    }
+    }
+
+    if (realworkingdir == NULL) {
+	    if (strncpy(realworkingdir, workingdir, workingdirlen) == NULL) {
+		    send_error(500, fd, is_valid_request, response, response_string);
+		    return;
+	    }
+    }
 
     if (realpath(dirname, path) == NULL) {
         send_error(404, fd, is_valid_request, response, response_string);
         return;
     }
-    char cwd[PATH_MAX];
     
-	if (getcwd(cwd, sizeof(cwd)) == NULL && flag) {
-        send_error(500, fd, is_valid_request, response, response_string);
-        return;
-    }
           /* Lock user in the current working directory */
-    if (strncmp(path, cwd, strlen(cwd)) != 0 && flag) {
+    if (strncmp(path, realworkingdir, strlen(realworkingdir)) != 0) {
             bzero(path, strlen(path));
-            if (strncpy(path, "./", strlen("./")) == NULL) {
+            if (strncpy(path, realworkingdir, strlen(realworkingdir)) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
                     return;
             }
@@ -46,7 +72,7 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
                     return;
             }
 
-            if (strncmp(path, cwd, strlen(cwd)) != 0) {
+            if (strncmp(path, realworkingdir, strlen(realworkingdir)) != 0) {
                     send_error(401, fd, is_valid_request, response, response_string);
                     return;
             }
@@ -58,14 +84,6 @@ void readdirs(char* dirname, int fd, bool is_valid_request, RESPONSE* response,
     /* Doing a +1 for termination with \0*/
     (void)strncpy(indexfile, dirname, dirlen + 1);
     (void)strncat(indexfile, "/index.html", INDEX_SIZE - 1);
-    struct stat sb;
-    
-	if (stat(dirname, &sb) != 0) {
-        send_error(401, fd, is_valid_request, response, response_string);
-        return;
-    }
-    int isDir = S_ISDIR(sb.st_mode);
-    
 	if (access(indexfile, R_OK) == 0 || !isDir) {
         FILE* fp;
         if (!isDir) {

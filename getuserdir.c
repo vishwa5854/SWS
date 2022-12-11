@@ -58,34 +58,19 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
         send_error(404, fd, is_valid_request, response, response_string);
         return;
     }
-    int swsdirlen = strlen(p->pw_dir) + SWS_LEN + userstrlen - i - 1;
+    char* userdir = p->pw_dir;
+    int userdirlen = strlen(userdir);
+    int swsdirlen = userdirlen + SWS_LEN + userstrlen - i - 1;
     char* swsdir;
-    int userdirlen = strlen(p->pw_dir);
     
 	if ((swsdir = malloc(swsdirlen * sizeof(char*))) == NULL) {
         send_error(500, fd, is_valid_request, response, response_string);
         return;
     }
-    (void)strncpy(swsdir, p->pw_dir, userdirlen);
+    (void)strncpy(swsdir, userdir, userdirlen);
     (void)strncat(swsdir, "/sws/", SWS_LEN);
     if (requestedContent != NULL) {
 	    (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
     }
-    char* resolvedpath;
-    
-	if ((resolvedpath = malloc(PATH_MAX * sizeof(char*))) == NULL) {
-        send_error(500, fd, is_valid_request, response, response_string);
-        return;
-    }
-    
-	if ((realpath(swsdir, resolvedpath)) == NULL) {
-        send_error(500, fd, is_valid_request, response, response_string);
-        return;
-    }
-    
-	if (strncmp(p->pw_dir, resolvedpath, userdirlen) != 0) {
-        send_error(401, fd, is_valid_request, response, response_string);
-        return;
-    }
-    readdirs(swsdir, fd, is_valid_request, response, response_string, false);
+    readdirs(swsdir, userdir, fd, is_valid_request, response, response_string);
 }

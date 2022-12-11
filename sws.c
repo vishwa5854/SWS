@@ -50,7 +50,6 @@ int createSocket(int port, struct flags_struct flags) {
 
         if ((inet6_pton_result = inet_pton(PF_INET6, given_addr, &ip_result)) ==
             1) {
-            printf("inet_pton parsed as ipv6!\n");
             server.sin6_addr = ip_result;
         } else if (inet6_pton_result == 0) {
             printf("inet_pton: string not parsable!\n");
@@ -140,8 +139,8 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "c:dhi:l:p:")) != -1) {
         switch (opt) {
             case 'c':
-                (void)strncpy(flags.cdi_dir_arg, optarg, PATH_MAX);
-                flags.cdi_dir_arg[PATH_MAX] = '\0';
+                (void)strncpy(flags.cdi_dir_arg, optarg, strnlen(optarg, PATH_MAX));
+                flags.cdi_dir_arg[strnlen(optarg, PATH_MAX)] = '\0';
                 flags.c_flag = 1;
                 break;
             case 'd':
@@ -151,18 +150,18 @@ int main(int argc, char **argv) {
                 printUsage(argv[0]);
                 return EXIT_SUCCESS;
             case 'i':
-                (void)strncpy(flags.addr_arg, optarg, IPV6_MAXSTRLEN);
-                flags.addr_arg[IPV6_MAXSTRLEN] = '\0';
+                (void)strncpy(flags.addr_arg, optarg, strnlen(optarg, IPV6_MAXSTRLEN));
+                flags.addr_arg[strnlen(optarg, IPV6_MAXSTRLEN)] = '\0';
                 flags.i_flag = 1;
                 break;
             case 'l':
-                (void)strncpy(flags.log_file_arg, optarg, PATH_MAX);
-                flags.log_file_arg[PATH_MAX] = '\0';
+                (void)strncpy(flags.log_file_arg, optarg, strnlen(optarg, PATH_MAX));
+                flags.log_file_arg[strnlen(optarg, PATH_MAX)] = '\0';
                 flags.l_flag = 1;
                 break;
             case 'p':
-                strncpy(flags.port_arg, optarg, PORT_MAXSTRLEN);
-                flags.port_arg[PORT_MAXSTRLEN] = '\0';
+                (void)strncpy(flags.port_arg, optarg, strnlen(optarg, PORT_MAXSTRLEN));
+                flags.port_arg[strnlen(optarg, PORT_MAXSTRLEN)] = '\0';
                 flags.p_flag = 1;
                 break;
             case '?':

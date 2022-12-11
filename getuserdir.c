@@ -9,13 +9,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "handler.h"
 #include "readdirs.h"
 #include "structures.h"
 
-void getuserdir(char* userstr, int fd, bool is_valid_request,
+void getuserdir(char* userstr, int fd, time_t modified_since, bool is_valid_request,
                 RESPONSE* response, char* response_string) {
     int userstrlen = strlen(userstr);
     /* Initializing as NULL because if not, they are not considered NULL but have some garbage value */
@@ -75,5 +76,5 @@ void getuserdir(char* userstr, int fd, bool is_valid_request,
     if (requestedContent != NULL) {
             (void)strncat(swsdir, requestedContent, userstrlen - i - 1);
     }
-        readdirs(swsdir, workingdir, fd, is_valid_request, response, response_string);
+        readdirs(swsdir, workingdir, fd, modified_since, is_valid_request, response, response_string);
 }

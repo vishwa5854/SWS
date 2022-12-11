@@ -14,6 +14,7 @@
 
 #include "handler.h"
 #include "structures.h"
+#include "util.h"
 
 void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bool is_valid_request, RESPONSE* response,
               char* response_string) {
@@ -111,7 +112,16 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         ssize_t temp;
         char* line = NULL;
         size_t linesize = 0;
-    
+
+        char* last_modified_time[DATE_MAX_LEN];
+        get_gmt_date_str(last_modified_time, DATE_MAX_LEN);
+        if (strncpy(response->last_modified, last_modified_time, DATE_MAX_LEN) == NULL) {
+            send_error(500, fd, is_valid_request, response, response_string);
+            close_connection(fd);
+        }
+        response->content_length = sb.st_size;
+        response->status_code = 200;
+        send_headers(fd, is_valid_request, response, response_string);
 	    while ((temp = getline(&line, &linesize, fp)) != -1) {
 		    write(fd, line, strlen(line));
             }
@@ -121,7 +131,8 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
             send_error(401, fd, is_valid_request, response, response_string);
             close_connection(fd);
         }
-	send_headers(fd, is_valid_request, response, response_string);
+        response->status_code = 200;
+        send_headers(fd, is_valid_request, response, response_string);
     
 	    while ((dirp = readdir(dir)) != NULL) {
 	    if (strncmp(dirp->d_name, ".", 1) != 0) {
@@ -131,4 +142,10 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         }
     }
 	close_connection(fd);
+}
+
+int main(int argc, char** argv) {
+	RESPONSE response;
+	readdirs(argv[1],argv[2], STDOUT_FILENO, 0, true, &response, "OK");
+	return(0);
 }

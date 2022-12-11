@@ -16,7 +16,7 @@
 #include "structures.h"
 #include "util.h"
 
-int compare_strings(const char* a, const char* b) {
+int compare_strings(const void* a, const void* b) {
     int len1 = strlen(a);
     int len2 = strlen(b);
     if (len1 < len2) {
@@ -102,7 +102,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 	if (access(indexfile, R_OK) == 0 || !isDir) {
         FILE* fp;
         if (!isDir) {
-            if (sb.st_mtim < modified_since) {
+            if (sb.st_mtime < modified_since) {
                 send_error(304, fd, is_valid_request, response, response_string);
                 close_connection(fd);
             }
@@ -116,7 +116,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
                 send_error(401, fd ,is_valid_request, response, response_string);
                 close_connection(fd);
             }
-            if (sb.st_mtim < modified_since) {
+            if (sb.st_mtime < modified_since) {
                 send_error(304, fd, is_valid_request, response, response_string);
                 close_connection(fd);
             }
@@ -155,11 +155,11 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         int count = 0;
 	    while ((dirp = readdir(dir)) != NULL) {
 	    if (strncmp(dirp->d_name, ".", 1) != 0) {
-            if ((buf[i] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
+            if ((buf[count] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
                 send_error(500, fd, is_valid_request, response, response_string);
                 close_connection(fd);
             }
-            if (strncpy(buf[i], dirp->d_name, strlen(dirp->d_name)) == NULL) {
+            if (strncpy(buf[count], dirp->d_name, strlen(dirp->d_name)) == NULL) {
                 send_error(500, fd, is_valid_request, response, response_string);
                 close_connection(fd);
             }

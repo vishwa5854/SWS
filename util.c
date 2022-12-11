@@ -147,9 +147,6 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            /** TODO: */
-            printf("%d\n", is_valid(token, HTTP_URL_REGEX));
-            
             return valid;
             // URI validation
             break;

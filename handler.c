@@ -12,14 +12,19 @@
 
 int current_fd;
 bool close_current_connection = true;
+bool debug_mode = false;
 
 void close_connection(int fd) {
     /** Sending a tcp close connection message to the client */
     (void)shutdown(fd, SHUT_RDWR);
     (void)close(fd);
 
-    /** Lemme die peacefully :) */
-    _exit(EXIT_SUCCESS);
+    /** In debug mode there is no child process that is handling client request,
+     * if we exit it will cause the entire server to stop */
+    if (!debug_mode) {
+        /** Child dies peacefully :) */
+        _exit(EXIT_SUCCESS);
+    }
 }
 
 void createResponse(RESPONSE *response) {
@@ -311,6 +316,17 @@ void handleSocket(int socket, struct flags_struct flags) {
     }
 
     if (flags.d_flag) {
+        pid = 0;
+        debug_mode = true;
+    } else {
+        pid = fork();
+    }
+
+    if (pid < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (!pid) {
+        /** Child */
         current_fd = fd;
 
         if (signal(SIGALRM, alarm_handler) == SIG_ERR) {
@@ -337,16 +353,6 @@ void handleSocket(int socket, struct flags_struct flags) {
             send_error(500, fd, true, &response, response_string);
         }
 
-        handleConnection(fd, client);
-    }
-
-    if ((pid = fork()) < 0) {
-        perror("fork");
-        exit(EXIT_FAILURE);
-    } else if (!pid) {
-        current_fd = fd;
-        signal(SIGALRM, alarm_handler);
-        alarm(TIMEOUT);
         handleConnection(fd, client);
     }
 }

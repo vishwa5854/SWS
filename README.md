@@ -19,3 +19,5 @@ Asana.com link : <a>https://app.asana.com/share/vishw/cs631/1203202255113786/ac1
 <li>Then devide each segment to individual members</li>
 <li>If any memeber is facing difficulty then all come together to collaborate with him</li>
 </ol>
+
+Right now for "If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT" if the regex passes for the date type then it wouldn't really validate different time stamp.

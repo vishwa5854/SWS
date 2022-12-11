@@ -12,7 +12,7 @@
 #include "flags.h"
 #include "structures.h"
 
-void handleConnection(int fd, struct sockaddr_in6 client);
+void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct flags);
 
 void handleSocket(int socket, struct flags_struct);
 

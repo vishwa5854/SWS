@@ -147,8 +147,11 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            return valid;
-            // URI validation
+            valid = is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX);
+            
+            if (valid) {
+                (void)strncpy(request->path, token, strlen(token));
+            }
             break;
         case 2:
             /** Protocol and version check bruh. */
@@ -171,7 +174,6 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         /** Not to confuse with token#4 instead used for If-Modified-Since header. */
         case 3:
-            puts("util.c executing\n");
             if (is_valid(token, HTTP_DATE_REGEX)) {
                 valid = true;
                 request->if_modified_str_type = 1;
@@ -214,11 +216,3 @@ void reset_request_object(REQUEST* request) {
     request->if_modified_t = 0;
     request->time_request_made = 0;
 }
-
-// bool validate_URL(char* URL) {
-    /**
-     * 1. http[s]://chutiyapa/--this is what we need
-     * 2. Direct path /../../../
-     * 3. Starts with / */
-    
-// }

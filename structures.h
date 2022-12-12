@@ -78,7 +78,7 @@
 
 #define ASCTIME_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (([0-3][0-9])| [1-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} ([0-9][0-9][0-9][0-9])"
 
-#define HTTP_URL_REGEX "^https?://[a-zA-Z0-9.-:]+/[a-zA-Z0-9/.?&=_]+$"
+#define HTTP_URL_REGEX "^https?:\\/\\/[a-zA-Z0-9.-:]+\\/[a-zA-Z0-9\\/.?&~=_-]+$"
 
 #define FILE_PATH_REGEX "^([a-zA-Z0-9_~?&=.\\()-\\/])+$"
 

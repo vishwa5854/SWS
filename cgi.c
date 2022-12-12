@@ -80,11 +80,12 @@ int execute_file(const char *executable_path, int socket_fd,
     (void)strncpy(variable_executable_path, executable_path_after_strtok, strlen(executable_path_after_strtok));
     char *where_is_cgi = strstr(variable_executable_path, find_string);
 
-    char resolved_path_starting_bak[strlen(resolved_path_of_starting) + 2];
+    char resolved_path_starting_bak[PATH_MAX];
     bzero(resolved_path_starting_bak, sizeof(resolved_path_starting_bak));
-
+   
     (void)strncpy(resolved_path_starting_bak, resolved_path_of_starting,
                   strlen(resolved_path_of_starting));
+    
 
     if (where_is_cgi) {
         (void)strncat(resolved_path_of_starting,
@@ -103,7 +104,7 @@ int execute_file(const char *executable_path, int socket_fd,
 
     char combined_query_string[strlen(query_string) + strlen(parameters_array)+1];
     bzero(combined_query_string, sizeof(combined_query_string));
-
+    
     if (parameters_array == NULL) {
         
         (void)strncpy(parameters_array, "", strlen(""));
@@ -115,8 +116,7 @@ int execute_file(const char *executable_path, int socket_fd,
         (void)strlcat(combined_query_string, parameters_array, strlen(parameters_array) + strlen(combined_query_string) + 1);
         combined_query_string[strlen(parameters_array) + strlen(combined_query_string)] = '\0';
     }
-
-
+  
     char *envp[] = {combined_query_string, 0};
 
     /* Check if file exsists and has executable permission with the respective
@@ -128,6 +128,7 @@ int execute_file(const char *executable_path, int socket_fd,
     if (access(resolved_path_of_executable_path, X_OK)) {
         send_error(401, socket_fd, is_valid_request, response, response_string);
     }
+     
     /* Starting on comparing */
     strncat(resolved_path_starting_bak, "/", strlen("/"));
 
@@ -135,6 +136,8 @@ int execute_file(const char *executable_path, int socket_fd,
         NULL) {
         send_error(401, socket_fd, is_valid_request, response, response_string);
     }
+
+    
     /* End of comparing code*/
 
     /*code for checking the paths given by the user with realpath*/

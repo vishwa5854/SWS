@@ -313,7 +313,18 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
     // }
 
     /** Testing for now, calling the CGI bruh */
-    execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
+
+    // char find_string[] = "/cgi-bin";
+    if ((strncmp(request.path,"/cgi-bin",strlen("/cgi-bin"))==0))
+    {   
+        // puts(request.path);
+        execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
+
+    }
+    else{
+        puts("readirs");//TODO add here anmols code
+    }
+    // execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
 
     
 }

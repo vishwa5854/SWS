@@ -1,30 +1,55 @@
 #include "handler.h"
 
+#include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "cgi.h"
 #include "flags.h"
+#include "logger.h"
+#include "readdirs.h"
+#include "getuserdir.h"
 #include "structures.h"
 #include "util.h"
 
 int current_fd;
 bool close_current_connection = true;
 bool debug_mode = false;
+struct flags_struct *g_flags;
+REQUEST *g_request;
+RESPONSE *g_response;
+char *g_rip;
 
 void close_connection(int fd) {
     /** Sending a tcp close connection message to the client */
     (void)shutdown(fd, SHUT_RDWR);
     (void)close(fd);
 
+    int logger_fd;
+
+    if (g_flags->l_flag) {
+	    if (g_flags->d_flag) {
+		    logger_fd = STDOUT_FILENO;
+	    }
+	    else {
+		    if ((logger_fd = open(g_flags->log_file_arg, O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR)) == -1) {
+			    /* Stopping the server if we don't have access to the logfile '*/
+			    _exit(EXIT_FAILURE);
+		    }
+	    }
+	    writelog(logger_fd, *g_request, *g_response, g_rip);
+
+    }
+
     /** In debug mode there is no child process that is handling client request,
      * if we exit it will cause the entire server to stop */
-    if (!debug_mode) {
+    //if (!debug_mode) {
         /** Child dies peacefully :) */
         _exit(EXIT_SUCCESS);
-    }
+    //}
 }
 
 void createResponse(RESPONSE *response) {
@@ -36,8 +61,6 @@ void createResponse(RESPONSE *response) {
                   strlen(SUPPORTED_PROTOCOL_ONLY));
     (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY,
                   strlen(SUPPORTED_VERSION_ONLY));
-    (*response).last_modified[0] = '\0';
-    (*response).content_length = 0;
     get_status_verb((*response).status_code, (*response).status_verb);
 }
 
@@ -101,6 +124,7 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response,
 
     /** We stop taking anything else from client now */
     (void)create_response_string(response, response_string);
+    g_response = response;
 
     /** We couldn't write headers, so it is better to close the connection and
      * call it a day */
@@ -110,6 +134,11 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response,
 
     if (write(fd, "\r\n", strlen("\r\n")) < 0) {
         close_connection(fd);
+    }
+    if (strlen(g_request->verb) == strlen(SUPPORTED_HTTP_VERB_2)) {
+    	if (strncmp(g_request->verb, SUPPORTED_HTTP_VERB_2, strlen(SUPPORTED_HTTP_VERB_2)) == 0) {
+		close_connection(fd);
+	}
     }
 }
 
@@ -245,7 +274,7 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
 
     if (is_valid_request && (request.if_modified_str_type != 0)) {
         struct tm tm;
-        time_t t;
+        time_t t = 0;
 
         if (request.if_modified_str_type == 1) {
             if (strptime(request.if_modified_since, "%a, %d %b %Y %T GMT",
@@ -290,6 +319,8 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
     if (!is_valid_request) {
         send_error(400, fd, is_valid_request, &response, response_string);
     }
+    g_request = &request;
+    g_rip = (char*) rip;
 
     /** TODO: URL PARSING */
     /**
@@ -298,23 +329,16 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
      * removing ~ 1.2 else call readdirs
      * 2. -c is there
      * */
-    // if (!flags.c_flag) {
-    //     if (strncmp(request.path, "/~", strlen("/~")) == 0) {
-    //         char file_path[strlen(request.path) - 2];
-    //         (void)strncpy(file_path, request.path + 2,
-    //                       strlen(request.path) - 2);
-    //         // getuserdir(file_path, fd, is_valid_request, &response,
-    //                 //    response_string);
-    //     } else {
-    //         puts(request.path);
-    //         // readdirs(request.path, fd, is_valid_request, &response,
-    //                 //  response_string);
-    //     }
-    // }
+    if (!flags.c_flag) {
+        if (strncmp(request.path, "/~", strlen("/~")) == 0) {
+            getuserdir(request.path + 2, fd, request.if_modified_t, is_valid_request, &response,
+                       response_string);
+        } else {
+            readdirs(request.path, flags.argument_path, fd, request.if_modified_t, is_valid_request, &response,
+                     response_string);
+        }
+    }
 
-    /** Testing for now, calling the CGI bruh */
-
-    // char find_string[] = "/cgi-bin";
     if ((strncmp(request.path,"/cgi-bin",strlen("/cgi-bin"))==0))
     {   
         // puts(request.path);
@@ -324,9 +348,9 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
     else{
         puts("readirs");//TODO add here anmols code
     }
-    // execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
 
-    
+    /** Testing for now, calling the CGI bruh */
+    // execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
@@ -346,6 +370,7 @@ void handleSocket(int socket, struct flags_struct flags) {
         perror("accept");
         return;
     }
+    g_flags = &flags;
 
     if (flags.d_flag) {
         pid = 0;

@@ -16,7 +16,7 @@ void get_gmt_date_str(char* time_str, size_t time_length) {
     time_t now = time(0);
     struct tm tm = *gmtime(&now);
 
-    if (strftime(time_str, time_length, "%a, %d %b %Y %H:%M:%S %Z", &tm) <= 0) {
+    if (strftime(time_str, time_length, "%a, %d %b %Y %H:%M:%S GMT", &tm) <= 0) {
         perror("Error while getting GMT timestamp");
     }
 }

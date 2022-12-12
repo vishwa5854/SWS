@@ -1,92 +1,374 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <errno.h>
-
 #include "cgi.h"
 
-#define BUFFER_SIZE 64
-// TODO add all the code inside the while and send return to socket
-// TODO check whether the file has permission to execute the file 
-// TODO check whether the files are in the same parent directory 
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-int execute_file(const char *executable_path, int socket_fd)
-{
+#include "flags.h"
+#include "handler.h"
+
+int get_real_path(const char *orginal_path, char *resolved_path) {
+    if (realpath(orginal_path, resolved_path) == NULL) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int execute_file(const char *executable_path, int socket_fd,
+                 bool is_valid_request, RESPONSE *response,
+                 char *response_string, struct flags_struct flags) {
+    char resolved_path_of_starting[PATH_MAX];
+    char resolved_path_of_executable_path[PATH_MAX];
+
+    if ((get_real_path(flags.cdi_dir_arg, resolved_path_of_starting)) == 0) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    (void)socket_fd;
+    char temp_buff[BUFSIZ];
+    int fd_out[2];
+    int n_chars = 0;
+    int flag = 0;
+    const char *Query_String = "QUERY_STRING=";
+    const char *combined_query_string;
+    const char *executable_path_after_strtok;
+    const char *parameters;
+
+    if (strstr(executable_path, "?") == NULL) {
+        flag = 0;
+    } else {
+        flag = 1;
+    }
+
+    executable_path_after_strtok = strtok((char *)executable_path, "?");
+
+    if (flag == 0) {
+        parameters = "";
+    } else {
+        parameters = strtok(NULL, "?");
+    }
+    char *parameters_array;
+
+    if ((parameters_array = malloc(sizeof(char) * (strlen(parameters) + 1))) ==
+        NULL) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (parameters != NULL) {
+        (void)strncpy(parameters_array, parameters, strlen(parameters));
+    } else {
+        (void)strncpy(parameters_array, "", strlen("") + 1);
+    }
+    char find_string[] = "/cgi-bin";
+    char *variable_executable_path;
+
+    if ((variable_executable_path = malloc(
+             sizeof(char) * (strlen(executable_path_after_strtok) + 1))) ==
+        NULL) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+    variable_executable_path = (char *)executable_path_after_strtok;
+    char *where_is_cgi = strstr(variable_executable_path, find_string);
+    char *resolved_path_starting_bak;
+
+    if ((resolved_path_starting_bak = malloc(
+             sizeof(char) * (strlen(resolved_path_of_starting) + 2))) == NULL) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+    (void)strncpy(resolved_path_starting_bak, resolved_path_of_starting,
+                  strlen(resolved_path_of_starting));
+
+    if (where_is_cgi) {
+        (void)strncat(resolved_path_of_starting,
+                      where_is_cgi + strlen(find_string),
+                      strlen(where_is_cgi + strlen(find_string)));
+        (void)strncpy(where_is_cgi, resolved_path_of_starting,
+                      strlen(resolved_path_of_starting));
+        where_is_cgi[strlen(resolved_path_of_starting)] = '\0';
+    }
+
+    if ((get_real_path(variable_executable_path,
+                       resolved_path_of_executable_path)) == 0) {
+        send_error(404, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (parameters_array == NULL) {
+        parameters_array = "";
+        if ((combined_query_string =
+                 malloc(strlen(Query_String) * sizeof(char))) == NULL) {
+            send_error(500, socket_fd, is_valid_request, response,
+                       response_string);
+        }
+        combined_query_string =
+            strncpy((char *restrict)combined_query_string,
+                    (char *restrict)Query_String, strlen(Query_String));
+    } else {
+        if ((combined_query_string =
+                 malloc(sizeof(char) * (strlen(Query_String) +
+                                        strlen(parameters_array)))) == NULL) {
+            send_error(500, socket_fd, is_valid_request, response,
+                       response_string);
+        }
+
+        (void)strncpy((char *restrict)combined_query_string,
+                      (char *restrict)Query_String, strlen(Query_String));
+        (void)strlcat(
+            (char *restrict)combined_query_string,
+            (char *restrict)parameters_array,
+            strlen(parameters_array) + strlen(combined_query_string) + 1);
+    }
+    char *envp[] = {(char *)combined_query_string, 0};
+
+    free((void *)combined_query_string);
+
+    /* Check if file exsists and has executable permission with the respective
+     * error codes*/
+    if (access(resolved_path_of_executable_path, F_OK) == -1) {
+        send_error(404, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (access(resolved_path_of_executable_path, X_OK)) {
+        send_error(401, socket_fd, is_valid_request, response, response_string);
+    }
+    /* Starting on comparing */
+    strncat(resolved_path_starting_bak, "/", strlen("/"));
+
+    if (strstr(resolved_path_of_executable_path, resolved_path_starting_bak) ==
+        NULL) {
+        send_error(401, socket_fd, is_valid_request, response, response_string);
+    }
+    free(resolved_path_starting_bak);
+    /* End of comparing code*/
+
+    /*code for checking the paths given by the user with realpath*/
+
+    /* Code for converting the given request path to realpath */
+
     sigset_t blockMask, origMask;
     struct sigaction saIgnore, saOrigQuit, saOrigInt, saDefault;
     pid_t childPid;
     int status, savedErrno;
+    /* Code for enviornment variable assigning*/
+    int errno;
 
-    sigemptyset(&blockMask); /* Block SIGCHLD */
-    sigaddset(&blockMask, SIGCHLD);
-    sigprocmask(SIG_BLOCK, &blockMask, &origMask);
+    /* Block SIGCHLD */
+    if (sigemptyset(&blockMask) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
 
-    saIgnore.sa_handler = SIG_IGN; /* Ignore SIGINT and SIGQUIT */
+    if (sigaddset(&blockMask, SIGCHLD) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (sigprocmask(SIG_BLOCK, &blockMask, &origMask) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    /* Ignore SIGINT and SIGQUIT */
+    saIgnore.sa_handler = SIG_IGN;
     saIgnore.sa_flags = 0;
-    sigemptyset(&saIgnore.sa_mask);
-    sigaction(SIGINT, &saIgnore, &saOrigInt);
-    sigaction(SIGQUIT, &saIgnore, &saOrigQuit);
 
-    // Forking a new process
-    switch (childPid = fork())
-    {
-    case -1: /* fork() failed */
-        status = -1;
-        perror("Could not create child process (fork() failed).");
-        break; /* Carry on to reset signal attributes */
+    if (sigemptyset(&saIgnore.sa_mask) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
 
-    case 0: /* Child: exec CGI */
-        // Duplicating the file descriptors onto the write-ends of the pipes
-        if (dup2(socket_fd, STDOUT_FILENO) < 0)
-        {
-            perror("Could not duplicate STDOUT file descriptor to the pipe.");
+    if (sigaction(SIGINT, &saIgnore, &saOrigInt) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (sigaction(SIGQUIT, &saIgnore, &saOrigQuit) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    /** Creation of pipe failed, so Internal Server Error 500 */
+    if (pipe(fd_out) < 0) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    /** Forking a new process */
+    switch (childPid = fork()) {
+        /* fork() failed */
+        case -1:
             status = -1;
+            perror("Could not create child process (fork() failed).");
+
+            send_error(500, socket_fd, is_valid_request, response,
+                       response_string);
+            break; /* Carry on to reset signal attributes */
+
+        case 0: /* Child: exec CGI */
+            /* We ignore possible error returns because the only specified error
+            is for a failed exec(), and because errors in these calls can't
+            affect the caller of command() (which is a separate process) */
+
+            /** Child, closing the read end */
+            (void)close(fd_out[0]);
+
+            if (dup2(fd_out[1], STDOUT_FILENO) != STDOUT_FILENO) {
+                send_error(500, socket_fd, is_valid_request, response,
+                           response_string);
+                break;
+            }
+
+            saDefault.sa_handler = SIG_DFL;
+            saDefault.sa_flags = 0;
+
+            if (sigemptyset(&saDefault.sa_mask) == -1) {
+                send_error(500, socket_fd, is_valid_request, response,
+                           response_string);
+            }
+
+            if (saOrigInt.sa_handler != SIG_IGN) {
+                if (sigaction(SIGINT, &saDefault, NULL) == -1) {
+                    send_error(500, socket_fd, is_valid_request, response,
+                               response_string);
+                }
+            }
+
+            if (saOrigQuit.sa_handler != SIG_IGN) {
+                if (sigaction(SIGQUIT, &saDefault, NULL) == -1) {
+                    send_error(500, socket_fd, is_valid_request, response,
+                               response_string);
+                }
+            }
+
+            if (sigprocmask(SIG_SETMASK, &origMask, NULL) == -1) {
+                send_error(500, socket_fd, is_valid_request, response,
+                           response_string);
+            }
+            char *args[] = {
+                "0",
+                NULL}; /* each element represents a command line argument */
+            char *env[] = {NULL}; /* leave the environment list null */
+
+            (void)args;
+            (void)env;
+
+            (void)close(fd_out[1]);
+
+            if (execve(resolved_path_of_executable_path, args, envp) == -1) {
+                (void)printf("Execve() Not able to run this\n");
+                send_error(500, socket_fd, is_valid_request, response,
+                           response_string);
+            }
+            free(variable_executable_path);
+
+            (void)printf("Execve() Not able to run this");
+
+            if (!flags.d_flag) {
+                _exit(127); /* We could not exec the shell */
+            }
             break;
-        }
-        
-        /* We ignore possible error returns because the only specified error
-           is for a failed exec(), and because errors in these calls can't
-           affect the caller of command() (which is a separate process) */
+        default: /* Parent: wait for our child to terminate */
+            /** Parent, closing the write end */
+            (void)close(fd_out[1]);
 
-        saDefault.sa_handler = SIG_DFL;
-        saDefault.sa_flags = 0;
-        sigemptyset(&saDefault.sa_mask);
+            /*
+            We must use waitpid() for this task; using wait() could
+            inadvertently collect the status of one of the caller's other
+            children
+            */
+            if (waitpid(childPid, &status, WNOHANG) < 0) {
+                perror(
+                    "Could not wait for child process; waitpid resulted in "
+                    "error.");
+                status = -1;
+                break;
+            }
 
-        if (saOrigInt.sa_handler != SIG_IGN)
-            sigaction(SIGINT, &saDefault, NULL);
-        if (saOrigQuit.sa_handler != SIG_IGN)
-            sigaction(SIGQUIT, &saDefault, NULL);
+            /** Check if the CGI program has terminated */
+            if (WIFEXITED(status)) {
+                /** CGI program exited, get its exit code */
+                int exit_code = WEXITSTATUS(status);
+                if (exit_code == 0) {
+                    /** CGI program succeeded, send output as response */
+                    response->status_code = 200;
+                    send_headers(socket_fd, is_valid_request, response,
+                                 response_string);
 
-        sigprocmask(SIG_SETMASK, &origMask, NULL);
+                    /** Sending the output of the child execve to the client. */
+                    n_chars = read(fd_out[0], temp_buff, BUFSIZ);
 
-        execl("/bin/sh", "sh", "-c", executable_path, (char *)NULL);
-        _exit(127); /* We could not exec the shell */
+                    if (n_chars < 0) {
+                        close_connection(socket_fd);
+                        break;
+                    }
 
-    default: /* Parent: wait for our child to terminate */
+                    while (n_chars > 0) {
+                        if (write(socket_fd, temp_buff, n_chars) < 0) {
+                            close_connection(socket_fd);
+                            break;
+                        }
+                        n_chars = read(fd_out[0], temp_buff, BUFSIZ);
 
-        /* We must use waitpid() for this task; using wait() could inadvertently
-           collect the status of one of the caller's other children */
-        if (waitpid(childPid, &status, 0) < 0)
-        {
-            perror("Could not wait for child process; waitpid resulted in error.");
-            status = -1;
-            break;
-        }
+                        if (n_chars < 0) {
+                            close_connection(socket_fd);
+                            break;
+                        }
+                    }
+                    close_connection(socket_fd);
+                } else {
+                    /** CGI program failed, send error response */
+                    send_error(500, socket_fd, is_valid_request, response,
+                               response_string);
+                }
+            } else {
+                /** CGI program has not terminated, read remaining data from the
+                 * pipe */
+                response->status_code = 200;
+                send_headers(socket_fd, is_valid_request, response,
+                             response_string);
+                /** Sending the output of the child execve to the client. */
+                n_chars = read(fd_out[0], temp_buff, BUFSIZ);
+
+                if (n_chars < 0) {
+                    close_connection(socket_fd);
+                    break;
+                }
+
+                while (n_chars > 0) {
+                    if (write(socket_fd, temp_buff, n_chars) < 0) {
+                        close_connection(socket_fd);
+                        break;
+                    }
+                    n_chars = read(fd_out[0], temp_buff, BUFSIZ);
+
+                    if (n_chars < 0) {
+                        close_connection(socket_fd);
+                        break;
+                    }
+                }
+                close_connection(socket_fd);
+            }
+
+            (void)close(fd_out[0]);
     }
 
     /* Unblock SIGCHLD, restore dispositions of SIGINT and SIGQUIT */
 
-    savedErrno = errno; /* The following may change 'errno' */
+    savedErrno = errno;
+    /* The following may change 'errno' */
+    if (sigprocmask(SIG_SETMASK, &origMask, NULL) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
 
-    sigprocmask(SIG_SETMASK, &origMask, NULL);
-    sigaction(SIGINT, &saOrigInt, NULL);
-    sigaction(SIGQUIT, &saOrigQuit, NULL);
+    if (sigaction(SIGINT, &saOrigInt, NULL) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
+
+    if (sigaction(SIGQUIT, &saOrigQuit, NULL) == -1) {
+        send_error(500, socket_fd, is_valid_request, response, response_string);
+    }
 
     errno = savedErrno;
 

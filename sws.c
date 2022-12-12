@@ -6,6 +6,9 @@
 #include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -16,6 +19,25 @@
 /** listen(2) states backlog silently limited to 128 */
 #define BACKLOG 128
 #define SLEEP_FOR 5
+
+int isPresentOrNot(const char *path_name) {
+    struct stat st;
+
+    if (stat((const char *)path_name, &st) != 0) {
+        (void)printf("\n Error getting information, of directory \n");
+        return (-1);
+    }
+
+    if (st.st_mode & S_IFDIR) {
+        (void)printf("\n Is a directory \n");
+        return (1);
+    } else {
+        (void)printf(
+            "\n Is regular File, please give a directory as an option to -c  "
+            "\n");
+        return (-1);
+    }
+}
 
 int createSocket(int port, struct flags_struct flags) {
     int sock;
@@ -139,9 +161,16 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "c:dhi:l:p:")) != -1) {
         switch (opt) {
             case 'c':
-                (void)strncpy(flags.cdi_dir_arg, optarg, strnlen(optarg, PATH_MAX));
+                (void)strncpy(flags.cdi_dir_arg, optarg,
+                              strnlen(optarg, PATH_MAX));
                 flags.cdi_dir_arg[strnlen(optarg, PATH_MAX)] = '\0';
                 flags.c_flag = 1;
+                int temp;
+
+                if ((temp = isPresentOrNot(flags.cdi_dir_arg)) != 1) {
+                    perror("-c option");
+                    exit(EXIT_FAILURE);
+                }
                 break;
             case 'd':
                 flags.d_flag = 1;
@@ -150,17 +179,20 @@ int main(int argc, char **argv) {
                 printUsage(argv[0]);
                 return EXIT_SUCCESS;
             case 'i':
-                (void)strncpy(flags.addr_arg, optarg, strnlen(optarg, IPV6_MAXSTRLEN));
+                (void)strncpy(flags.addr_arg, optarg,
+                              strnlen(optarg, IPV6_MAXSTRLEN));
                 flags.addr_arg[strnlen(optarg, IPV6_MAXSTRLEN)] = '\0';
                 flags.i_flag = 1;
                 break;
             case 'l':
-                (void)strncpy(flags.log_file_arg, optarg, strnlen(optarg, PATH_MAX));
+                (void)strncpy(flags.log_file_arg, optarg,
+                              strnlen(optarg, PATH_MAX));
                 flags.log_file_arg[strnlen(optarg, PATH_MAX)] = '\0';
                 flags.l_flag = 1;
                 break;
             case 'p':
-                (void)strncpy(flags.port_arg, optarg, strnlen(optarg, PORT_MAXSTRLEN));
+                (void)strncpy(flags.port_arg, optarg,
+                              strnlen(optarg, PORT_MAXSTRLEN));
                 flags.port_arg[strnlen(optarg, PORT_MAXSTRLEN)] = '\0';
                 flags.p_flag = 1;
                 break;
@@ -183,9 +215,9 @@ int main(int argc, char **argv) {
     flags.argument_path[PATH_MAX] = '\0';
 
     if (!flags.p_flag) {
-            /** If no -p flag provided, set port to 8080 by default */
+        /** If no -p flag provided, set port to 8080 by default */
         (void)strncpy(flags.port_arg, DEFAULT_PORT,
-                    strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
+                      strnlen(DEFAULT_PORT, PORT_MAXSTRLEN));
         flags.port_arg[PORT_MAXSTRLEN + 1] = '\0';
         flags.p_flag = 1;
     }

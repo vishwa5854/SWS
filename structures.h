@@ -1,7 +1,10 @@
 #ifndef STRUCTURES_H_
 #define STRUCTURES_H_
 
-#include<sys/syslimits.h>
+#include <sys/syslimits.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /** GET or HEAD + '\0' */
 #define HTTP_VERB_MAX_LEN 5
@@ -77,7 +80,7 @@
 
 #define HTTP_URL_REGEX "^https?://[a-zA-Z0-9.-:]+/[a-zA-Z0-9/.?&=_]+$"
 
-#define FILE_PATH_REGEX "^(/[a-zA-Z0-9._-~]*)*$"
+#define FILE_PATH_REGEX "^([a-zA-Z0-9_~?&=.\\()-\\/])+$"
 
 #define CGI 1
 

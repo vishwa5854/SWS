@@ -107,6 +107,10 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response,
     if (write(fd, response_string, strlen(response_string)) < 0) {
         close_connection(fd);
     }
+
+    if (write(fd, "\r\n", strlen("\r\n")) < 0) {
+        close_connection(fd);
+    }
 }
 
 void send_error(int status_code, int socket_fd, bool is_valid_request,
@@ -281,13 +285,10 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
         }
 
         request.if_modified_t = t;
-        send_headers(fd, is_valid_request, &response, response_string);
-        /** Bubyeee */
-        close_connection(fd);
-    } else {
-        send_headers(fd, is_valid_request, &response, response_string);
-        /** Bubyeee */
-        close_connection(fd);
+    }
+
+    if (!is_valid_request) {
+        send_error(400, fd, is_valid_request, &response, response_string);
     }
 
     /** TODO: URL PARSING */
@@ -297,23 +298,24 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
      * removing ~ 1.2 else call readdirs
      * 2. -c is there
      * */
-    if (!flags.c_flag) {
-        if (strncmp(request.path, "/~", strlen("/~")) == 0) {
-            char file_path[strlen(request.path) - 2];
-            (void)strncpy(file_path, request.path + 2,
-                          strlen(request.path) - 2);
-            // getuserdir(file_path, fd, is_valid_request, &response,
-                    //    response_string);
-        } else {
-            puts(request.path);
-            // readdirs(request.path, fd, is_valid_request, &response,
-                    //  response_string);
-        }
-    }
+    // if (!flags.c_flag) {
+    //     if (strncmp(request.path, "/~", strlen("/~")) == 0) {
+    //         char file_path[strlen(request.path) - 2];
+    //         (void)strncpy(file_path, request.path + 2,
+    //                       strlen(request.path) - 2);
+    //         // getuserdir(file_path, fd, is_valid_request, &response,
+    //                 //    response_string);
+    //     } else {
+    //         puts(request.path);
+    //         // readdirs(request.path, fd, is_valid_request, &response,
+    //                 //  response_string);
+    //     }
+    // }
 
-    send_headers(fd, is_valid_request, &response, response_string);
-    /** Bubyeee */
-    close_connection(fd);
+    /** Testing for now, calling the CGI bruh */
+    execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
+
+    
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */

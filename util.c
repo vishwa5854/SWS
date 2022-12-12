@@ -126,6 +126,24 @@ void get_status_verb(int status_code, char* status_verb) {
     }
 }
 
+int find_third_slash(char *path) {
+    ssize_t n_path = strlen(path);
+    ssize_t i = 0;
+    int count = 0;
+
+    for (; i < n_path; i++) {
+        if (count == 3) {
+            return i;
+        }
+
+        if (path[i] == '/') {
+            count++;
+        }
+    }
+
+    return 0;
+}
+
 bool create_request_frame(REQUEST* request, char* token, int token_number) {
     bool valid = true;
 
@@ -148,9 +166,19 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             break;
         case 1:
             valid = is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX);
-            
-            if (valid) {
+            puts("Is it valid bruh ???");
+            printf("%d\n", valid);
+            puts("PATH IS");
+            puts(token);
+
+            /** This URL contains a prefix of http://localhost:port_num/ */
+            if (is_valid(token, HTTP_URL_REGEX)) {
+                int location = find_third_slash(token);
+                (void)strncpy(request->path, token + location - 1, strlen(token));
+                puts(request->path);
+            } else {
                 (void)strncpy(request->path, token, strlen(token));
+
             }
             break;
         case 2:

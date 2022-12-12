@@ -33,3 +33,9 @@ Right now for "If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT" if the regex pa
   8. Input given in the user request is relative GET /cgi-bin/../sws/hello.cgi HTTP/1.0 and it stays inside the cgi-bin
   9. Input given in the user request is relative GET /cgi-bin/../../hello.cgi HTTP/1.0 and it goes outside the cgi-bin
   8.  
+
+
+Crazy Things
+1. If I put a relative path in CURL it will remove all dots before making the request which
+    wasted almost 2 hours of our time.
+2. Telnet fails when a large CGI is being executed.

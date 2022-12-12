@@ -40,6 +40,9 @@ int isPresentOrNot(const char *path_name) {
 }
 
 int createSocket(int port, struct flags_struct flags) {
+    puts("createSocket");
+    puts(flags.argument_path);
+    puts(flags.working_dir);
     int sock;
     socklen_t length;
     struct sockaddr_in6 server;
@@ -123,6 +126,10 @@ void reap() { (void)wait(NULL); }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void selectSocket(int socket, struct flags_struct flags) {
+    puts("selectSocket");
+    puts(flags.argument_path);
+    puts("some other opt");
+    puts(flags.cdi_dir_arg);
     fd_set ready;
     struct timeval to;
     int select_return;
@@ -211,8 +218,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    (void)strncpy(flags.argument_path, argv[0], PATH_MAX);
-    flags.argument_path[PATH_MAX] = '\0';
+    (void)strncpy(flags.argument_path, argv[0], strlen(argv[0]));
+    (void)strncpy(flags.working_dir, argv[0], strlen(argv[0]));
+    flags.argument_path[strlen(argv[0])] = '\0';
+    puts("flags");
+    puts(flags.argument_path);
 
     if (!flags.p_flag) {
         /** If no -p flag provided, set port to 8080 by default */

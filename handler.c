@@ -9,9 +9,9 @@
 
 #include "cgi.h"
 #include "flags.h"
+#include "getuserdir.h"
 #include "logger.h"
 #include "readdirs.h"
-#include "getuserdir.h"
 #include "structures.h"
 #include "util.h"
 
@@ -31,36 +31,31 @@ void close_connection(int fd) {
     int logger_fd;
 
     if (g_flags->l_flag) {
-	    if (g_flags->d_flag) {
-		    logger_fd = STDOUT_FILENO;
-	    }
-	    else {
-		    if ((logger_fd = open(g_flags->log_file_arg, O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR)) == -1) {
-			    /* Stopping the server if we don't have access to the logfile '*/
-			    _exit(EXIT_FAILURE);
-		    }
-	    }
-	    writelog(logger_fd, *g_request, *g_response, g_rip);
-
+        if (g_flags->d_flag) {
+            logger_fd = STDOUT_FILENO;
+        } else {
+            if ((logger_fd = open(g_flags->log_file_arg, O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR)) == -1) {
+                /* Stopping the server if we don't have access to the logfile '*/
+                _exit(EXIT_FAILURE);
+            }
+        }
+        writelog(logger_fd, *g_request, *g_response, g_rip);
     }
 
     /** In debug mode there is no child process that is handling client request,
      * if we exit it will cause the entire server to stop */
-    //if (!debug_mode) {
-        /** Child dies peacefully :) */
-        _exit(EXIT_SUCCESS);
+    // if (!debug_mode) {
+    /** Child dies peacefully :) */
+    _exit(EXIT_SUCCESS);
     //}
 }
 
 void createResponse(RESPONSE *response) {
     (void)strncpy((*response).server, SERVER, strlen(SERVER));
-    (void)strncpy((*response).content_type, CONTENT_TYPE_DEFAULT,
-                  strlen(CONTENT_TYPE_DEFAULT));
+    (void)strncpy((*response).content_type, CONTENT_TYPE_DEFAULT, strlen(CONTENT_TYPE_DEFAULT));
     get_gmt_date_str((*response).date, DATE_MAX_LEN);
-    (void)strncpy((*response).protocol, SUPPORTED_PROTOCOL_ONLY,
-                  strlen(SUPPORTED_PROTOCOL_ONLY));
-    (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY,
-                  strlen(SUPPORTED_VERSION_ONLY));
+    (void)strncpy((*response).protocol, SUPPORTED_PROTOCOL_ONLY, strlen(SUPPORTED_PROTOCOL_ONLY));
+    (void)strncpy((*response).version, SUPPORTED_VERSION_ONLY, strlen(SUPPORTED_VERSION_ONLY));
     get_status_verb((*response).status_code, (*response).status_verb);
 }
 
@@ -76,17 +71,14 @@ void alarm_handler(int sig_num) {
     }
 }
 
-void handleFirstLine(const char *separator, char *token, char *line_buffer,
-                     bool *is_first_line, bool *is_valid_request,
+void handleFirstLine(const char *separator, char *token, char *line_buffer, bool *is_first_line, bool *is_valid_request,
                      REQUEST *request) {
     int iterator = 0;
     token = strtok(line_buffer, separator);
 
     while (token != NULL) {
         if (iterator <= 2) {
-            (*is_valid_request) =
-                (*is_valid_request) &&
-                create_request_frame(request, token, iterator);
+            (*is_valid_request) = (*is_valid_request) && create_request_frame(request, token, iterator);
         } else {
             /** This is a bad request brother */
             (*is_valid_request) = false;
@@ -104,8 +96,7 @@ void handleFirstLine(const char *separator, char *token, char *line_buffer,
 
 /** Make sure to set the status_code and content length before calling this
  * function :) */
-void send_headers(int fd, bool is_valid_request, RESPONSE *response,
-                  char *response_string) {
+void send_headers(int fd, bool is_valid_request, RESPONSE *response, char *response_string) {
     if ((*response).status_code == 0) {
         if (!is_valid_request) {
             (*response).status_code = 400;
@@ -135,23 +126,24 @@ void send_headers(int fd, bool is_valid_request, RESPONSE *response,
     if (write(fd, "\r\n", strlen("\r\n")) < 0) {
         close_connection(fd);
     }
-    if (strlen(g_request->verb) == strlen(SUPPORTED_HTTP_VERB_2)) {
-    	if (strncmp(g_request->verb, SUPPORTED_HTTP_VERB_2, strlen(SUPPORTED_HTTP_VERB_2)) == 0) {
-		close_connection(fd);
-	}
+
+    if (response->status_verb != NULL) {
+        if (strlen(g_request->verb) == strlen(SUPPORTED_HTTP_VERB_2)) {
+            if (strncmp(g_request->verb, SUPPORTED_HTTP_VERB_2, strlen(SUPPORTED_HTTP_VERB_2)) == 0) {
+                close_connection(fd);
+            }
+        }
     }
 }
 
-void send_error(int status_code, int socket_fd, bool is_valid_request,
-                RESPONSE *response, char *response_string) {
+void send_error(int status_code, int socket_fd, bool is_valid_request, RESPONSE *response, char *response_string) {
     response->status_code = status_code;
 
     send_headers(socket_fd, is_valid_request, response, response_string);
 
     /** Sending the error again because clients like browsers will just show
      * empty page on error if we don't. */
-    if (write(socket_fd, response->status_verb, strlen(response->status_verb)) <
-        0) {
+    if (write(socket_fd, response->status_verb, strlen(response->status_verb)) < 0) {
         close_connection(socket_fd);
     }
 
@@ -164,7 +156,6 @@ void send_error(int status_code, int socket_fd, bool is_valid_request,
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
 void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct flags) {
-    /** TODO: Integration of logger will use the rip */
     const char *rip;
     char claddr[INET6_ADDRSTRLEN];
     bool is_first_line = true;
@@ -187,11 +178,11 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
     bool stream_done = false;
     bool end_of_request = false;
 
-    if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr,
-                         INET6_ADDRSTRLEN)) == NULL) {
+    if ((rip = inet_ntop(PF_INET6, &(client.sin6_addr), claddr, INET6_ADDRSTRLEN)) == NULL) {
         perror("inet_ntop");
 
         /** Something wrong with rip */
+        g_request = &request;
         send_error(500, fd, is_valid_request, &response, response_string);
     }
 
@@ -207,8 +198,8 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
 
             /** An error has occured while reading :( */
             if (n_chars < 0) {
-                send_error(500, fd, is_valid_request, &response,
-                           response_string);
+                g_request = &request;
+                send_error(500, fd, is_valid_request, &response, response_string);
                 return;
             }
 
@@ -254,22 +245,25 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
         }
 
         if (number_of_headers == 1) {
-            handleFirstLine(separator, token, line_buffer, &is_first_line,
-                            &is_valid_request, &request);
+            handleFirstLine(separator, token, line_buffer, &is_first_line, &is_valid_request, &request);
         } else {
             /** Reading the headers we don't validate or care about anything
              * else except for If-Modified-Since */
             token = strtok(line_buffer, separator);
 
-            if ((strlen(token) == strlen(SUPPORTED_HEADER)) &&
-                (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)) {
+            if ((strlen(token) == strlen(SUPPORTED_HEADER)) && (strncmp(token, SUPPORTED_HEADER, strlen(token)) == 0)) {
                 token = strtok(NULL, "");
-                is_valid_request = is_valid_request &&
-                                   create_request_frame(&request, token, 3);
+                is_valid_request = is_valid_request && create_request_frame(&request, token, 3);
             } else {
                 continue;
             }
         }
+    }
+
+    if (!is_valid_request) {
+        puts("Not a valid request");
+        g_request = &request;
+        send_error(400, fd, is_valid_request, &response, response_string);
     }
 
     if (is_valid_request && (request.if_modified_str_type != 0)) {
@@ -277,34 +271,28 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
         time_t t = 0;
 
         if (request.if_modified_str_type == 1) {
-            if (strptime(request.if_modified_since, "%a, %d %b %Y %T GMT",
-                         &tm) == NULL) {
+            if (strptime(request.if_modified_since, "%a, %d %b %Y %T GMT", &tm) == NULL) {
                 perror("strptime failed");
 
                 /** This is a bad request because the regex matched but the
                  * values doesn't make sense, which is a mistake from client */
-                send_error(400, fd, is_valid_request, &response,
-                           response_string);
+                send_error(400, fd, is_valid_request, &response, response_string);
             }
         } else if (request.if_modified_str_type == 2) {
-            if (strptime(request.if_modified_since, "%a, %d-%b-%y %T GMT",
-                         &tm) == NULL) {
+            if (strptime(request.if_modified_since, "%a, %d-%b-%y %T GMT", &tm) == NULL) {
                 perror("strptime failed");
 
                 /** This is a bad request because the regex matched but the
                  * values doesn't make sense, which is a mistake from client */
-                send_error(400, fd, is_valid_request, &response,
-                           response_string);
+                send_error(400, fd, is_valid_request, &response, response_string);
             }
         } else if (request.if_modified_str_type == 3) {
-            if (strptime(request.if_modified_since, "%a %b %d %T %Y GMT",
-                         &tm) == NULL) {
+            if (strptime(request.if_modified_since, "%a %b %d %T %Y GMT", &tm) == NULL) {
                 perror("strptime failed");
 
                 /** This is a bad request because the regex matched but the
                  * values doesn't make sense, which is a mistake from client */
-                send_error(400, fd, is_valid_request, &response,
-                           response_string);
+                send_error(400, fd, is_valid_request, &response, response_string);
             }
         }
 
@@ -316,41 +304,19 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
         request.if_modified_t = t;
     }
 
-    if (!is_valid_request) {
-        send_error(400, fd, is_valid_request, &response, response_string);
-    }
     g_request = &request;
-    g_rip = (char*) rip;
+    g_rip = (char *)rip;
 
-    /** TODO: URL PARSING */
-    /**
-     * 1. -c is not there
-     * 1.1 directly call user dir if the path start with /~, pass the path by
-     * removing ~ 1.2 else call readdirs
-     * 2. -c is there
-     * */
-    if (!flags.c_flag) {
+    if ((strncmp(request.path, "/cgi-bin", strlen("/cgi-bin")) == 0) && flags.c_flag) {
+        execute_file(request.path, fd, is_valid_request, &response, response_string, flags);
+
+    } else {
         if (strncmp(request.path, "/~", strlen("/~")) == 0) {
-            getuserdir(request.path + 2, fd, request.if_modified_t, is_valid_request, &response,
-                       response_string);
+            getuserdir(request.path + 2, fd, request.if_modified_t, is_valid_request, &response, response_string);
         } else {
-            readdirs(request.path, flags.argument_path, fd, request.if_modified_t, is_valid_request, &response,
-                     response_string);
+            readdirs(request.path, flags.working_dir, fd, request.if_modified_t, is_valid_request, &response, response_string);
         }
     }
-
-    if ((strncmp(request.path,"/cgi-bin",strlen("/cgi-bin"))==0))
-    {   
-        // puts(request.path);
-        execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
-
-    }
-    else{
-        puts("readirs");//TODO add here anmols code
-    }
-
-    /** Testing for now, calling the CGI bruh */
-    // execute_file(request.path, fd, is_valid_request, &response, response_string,flags);
 }
 
 /** This code has been referenced from CS631 APUE class notes apue-code/09 */
@@ -390,23 +356,27 @@ void handleSocket(int socket, struct flags_struct flags) {
             perror("signal for SIGALRM ");
 
             /** We need all of these to send an error. :( */
+            REQUEST request;
             RESPONSE response;
             response.status_code = 0;
             char response_string[BUFSIZ];
             bzero(response_string, sizeof(response_string));
             reset_response_object(&response);
 
+            g_request = &request;
             send_error(500, fd, true, &response, response_string);
         }
 
         if (alarm(TIMEOUT) == ((unsigned int)-1)) {
             /** We need all of these to send an error. :( */
             RESPONSE response;
+            REQUEST request;
             response.status_code = 0;
             char response_string[BUFSIZ];
             bzero(response_string, sizeof(response_string));
             reset_response_object(&response);
 
+            g_request = &request;
             send_error(500, fd, true, &response, response_string);
         }
 

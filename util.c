@@ -162,6 +162,7 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
                 (void)strncpy(request->verb, token, strlen(token));
             } else {
                 valid = false;
+                (void)strncpy(request->verb, "token", strlen("token"));
             }
             break;
         case 1:

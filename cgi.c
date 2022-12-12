@@ -17,7 +17,7 @@
 #include "handler.h"
 
 int get_real_path(const char *orginal_path, char *resolved_path) {
-    if (realpath(orginal_path, resolved_path) == NULL) {
+    if ((resolved_path = realpath(orginal_path, resolved_path)) == NULL) {
         return 0;
     } else {
         return 1;
@@ -28,7 +28,9 @@ int execute_file(const char *executable_path, int socket_fd,
                  bool is_valid_request, RESPONSE *response,
                  char *response_string, struct flags_struct flags) {
     char resolved_path_of_starting[PATH_MAX];
+    bzero(resolved_path_of_starting,sizeof(resolved_path_of_starting));
     char resolved_path_of_executable_path[PATH_MAX];
+    bzero(resolved_path_of_executable_path, sizeof(resolved_path_of_executable_path));
 
     if ((get_real_path(flags.cdi_dir_arg, resolved_path_of_starting)) == 0) {
         send_error(500, socket_fd, is_valid_request, response, response_string);
@@ -36,11 +38,16 @@ int execute_file(const char *executable_path, int socket_fd,
 
     (void)socket_fd;
     char temp_buff[BUFSIZ];
+    bzero(temp_buff,sizeof(temp_buff));
     int fd_out[2];
     int n_chars = 0;
     int flag = 0;
-    const char *Query_String = "QUERY_STRING=";
-    const char *combined_query_string;
+    char query_string[14];
+    bzero(query_string,sizeof(query_string));
+    (void)strncpy(query_string, "QUERY_STRING=", strlen("QUERY_STRING="));
+    query_string[13] = '\0';
+    
+    // (void)printf("Hello World: %d\n", query_string[13]);
     const char *executable_path_after_strtok;
     const char *parameters;
 
@@ -52,39 +59,30 @@ int execute_file(const char *executable_path, int socket_fd,
 
     executable_path_after_strtok = strtok((char *)executable_path, "?");
 
+
     if (flag == 0) {
         parameters = "";
     } else {
         parameters = strtok(NULL, "?");
     }
-    char *parameters_array;
-
-    if ((parameters_array = malloc(sizeof(char) * (strlen(parameters) + 1))) ==
-        NULL) {
-        send_error(500, socket_fd, is_valid_request, response, response_string);
-    }
-
+    char parameters_array[strlen(parameters) + 1];
+    bzero(parameters_array,sizeof(parameters_array));
     if (parameters != NULL) {
         (void)strncpy(parameters_array, parameters, strlen(parameters));
     } else {
         (void)strncpy(parameters_array, "", strlen("") + 1);
     }
     char find_string[] = "/cgi-bin";
-    char *variable_executable_path;
+    char variable_executable_path[strlen(executable_path_after_strtok) + 1];
+    bzero(variable_executable_path, sizeof(variable_executable_path));
 
-    if ((variable_executable_path = malloc(
-             sizeof(char) * (strlen(executable_path_after_strtok) + 1))) ==
-        NULL) {
-        send_error(500, socket_fd, is_valid_request, response, response_string);
-    }
-    variable_executable_path = (char *)executable_path_after_strtok;
+    // variable_executable_path = executable_path_after_strtok;
+    (void)strncpy(variable_executable_path, executable_path_after_strtok, strlen(executable_path_after_strtok));
     char *where_is_cgi = strstr(variable_executable_path, find_string);
-    char *resolved_path_starting_bak;
 
-    if ((resolved_path_starting_bak = malloc(
-             sizeof(char) * (strlen(resolved_path_of_starting) + 2))) == NULL) {
-        send_error(500, socket_fd, is_valid_request, response, response_string);
-    }
+    char resolved_path_starting_bak[strlen(resolved_path_of_starting) + 2];
+    bzero(resolved_path_starting_bak, sizeof(resolved_path_starting_bak));
+
     (void)strncpy(resolved_path_starting_bak, resolved_path_of_starting,
                   strlen(resolved_path_of_starting));
 
@@ -101,35 +99,25 @@ int execute_file(const char *executable_path, int socket_fd,
                        resolved_path_of_executable_path)) == 0) {
         send_error(404, socket_fd, is_valid_request, response, response_string);
     }
+    
+
+    char combined_query_string[strlen(query_string) + strlen(parameters_array)+1];
+    bzero(combined_query_string, sizeof(combined_query_string));
 
     if (parameters_array == NULL) {
-        parameters_array = "";
-        if ((combined_query_string =
-                 malloc(strlen(Query_String) * sizeof(char))) == NULL) {
-            send_error(500, socket_fd, is_valid_request, response,
-                       response_string);
-        }
-        combined_query_string =
-            strncpy((char *restrict)combined_query_string,
-                    (char *restrict)Query_String, strlen(Query_String));
+        
+        (void)strncpy(parameters_array, "", strlen(""));
+        (void)strncpy(combined_query_string, query_string, strlen(query_string));
+        
+        combined_query_string[strlen(query_string)] = '\0';
     } else {
-        if ((combined_query_string =
-                 malloc(sizeof(char) * (strlen(Query_String) +
-                                        strlen(parameters_array)))) == NULL) {
-            send_error(500, socket_fd, is_valid_request, response,
-                       response_string);
-        }
-
-        (void)strncpy((char *restrict)combined_query_string,
-                      (char *restrict)Query_String, strlen(Query_String));
-        (void)strlcat(
-            (char *restrict)combined_query_string,
-            (char *restrict)parameters_array,
-            strlen(parameters_array) + strlen(combined_query_string) + 1);
+        (void)strncpy(combined_query_string, query_string, strlen(query_string));
+        (void)strlcat(combined_query_string, parameters_array, strlen(parameters_array) + strlen(combined_query_string) + 1);
+        combined_query_string[strlen(parameters_array) + strlen(combined_query_string)] = '\0';
     }
-    char *envp[] = {(char *)combined_query_string, 0};
 
-    free((void *)combined_query_string);
+
+    char *envp[] = {combined_query_string, 0};
 
     /* Check if file exsists and has executable permission with the respective
      * error codes*/
@@ -147,7 +135,6 @@ int execute_file(const char *executable_path, int socket_fd,
         NULL) {
         send_error(401, socket_fd, is_valid_request, response, response_string);
     }
-    free(resolved_path_starting_bak);
     /* End of comparing code*/
 
     /*code for checking the paths given by the user with realpath*/
@@ -194,7 +181,7 @@ int execute_file(const char *executable_path, int socket_fd,
     if (pipe(fd_out) < 0) {
         send_error(500, socket_fd, is_valid_request, response, response_string);
     }
-
+     
     /** Forking a new process */
     switch (childPid = fork()) {
         /* fork() failed */
@@ -256,12 +243,12 @@ int execute_file(const char *executable_path, int socket_fd,
 
             (void)close(fd_out[1]);
 
+         
             if (execve(resolved_path_of_executable_path, args, envp) == -1) {
                 (void)printf("Execve() Not able to run this\n");
                 send_error(500, socket_fd, is_valid_request, response,
                            response_string);
             }
-            free(variable_executable_path);
 
             (void)printf("Execve() Not able to run this");
 

@@ -28,7 +28,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
 
     if ((realpath(workingdir, realworkingdir)) == NULL) {
         send_error(404, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
 
     int realworkingdirlen = strlen(realworkingdir);
@@ -37,36 +37,36 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         realworkingdirlen++;
         if (strncat(realworkingdir, "/", strlen("/")) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);
-            // close_connection(fd);
+            close_connection(fd);
         }
     }
 
     if (strncpy(path, realworkingdir, realworkingdirlen) == NULL) {
         send_error(500, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
     if (strncat(path, dirname, strlen(dirname)) == NULL) {
         send_error(500, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
 
     char finalpath[PATH_MAX];
 
     if (realpath(path, finalpath) == NULL) {
         send_error(404, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
 
     if (strncmp(finalpath, realworkingdir, realworkingdirlen - 1) != 0) {
         send_error(401, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
 
     struct stat sb;
 
     if (stat(finalpath, &sb) < 0) {
         send_error(401, fd, is_valid_request, response, response_string);
-        // close_connection(fd);
+        close_connection(fd);
     }
 
     int isDir = S_ISDIR(sb.st_mode);
@@ -83,24 +83,24 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         if (!isDir) {
             if (sb.st_mtime < modified_since) {
                 send_error(304, fd, is_valid_request, response, response_string);
-                // close_connection(fd);
+                close_connection(fd);
             }
             if ((fp = fopen(finalpath, "r")) == NULL) {
                 send_error(401, fd, is_valid_request, response, response_string);
-                // close_connection(fd);
+                close_connection(fd);
             }
         } else {
             if (stat(indexfile, &sb) < 0) {
                 send_error(401, fd, is_valid_request, response, response_string);
-                // close_connection(fd);
+                close_connection(fd);
             }
             if (sb.st_mtime < modified_since) {
                 send_error(304, fd, is_valid_request, response, response_string);
-                // close_connection(fd);
+                close_connection(fd);
             }
             if ((fp = fopen(indexfile, "r")) == NULL) {
                 send_error(401, fd, is_valid_request, response, response_string);
-                // close_connection(fd);
+                close_connection(fd);
             }
         }
         ssize_t temp;
@@ -125,7 +125,7 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
     } else {
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
-            // close_connection(fd);
+            close_connection(fd);
         }
         char** buf;
         int count = 0;
@@ -136,22 +136,22 @@ void readdirs(char* dirname, char* workingdir, int fd, time_t modified_since, bo
         }
         if ((buf = malloc(count * sizeof(char*))) == NULL) {
             send_error(500, fd, is_valid_request, response, response_string);
-            // close_connection(fd);
+            close_connection(fd);
         }
         if ((dir = opendir(finalpath)) == NULL) {
             send_error(401, fd, is_valid_request, response, response_string);
-            // close_connection(fd);
+            close_connection(fd);
         }
         int i = 0;
         while ((dirp = readdir(dir)) != NULL) {
             if (strncmp(dirp->d_name, ".", 1) != 0) {
                 if ((buf[i] = malloc(strlen(dirp->d_name) * sizeof(char*))) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
-                    // close_connection(fd);
+                    close_connection(fd);
                 }
                 if (strncpy(buf[i], dirp->d_name, strlen(dirp->d_name)) == NULL) {
                     send_error(500, fd, is_valid_request, response, response_string);
-                    // close_connection(fd);
+                    close_connection(fd);
                 }
                 i = i + 1;
             }

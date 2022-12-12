@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -261,7 +262,6 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
     }
 
     if (!is_valid_request) {
-        puts("Not a valid request");
         g_request = &request;
         send_error(400, fd, is_valid_request, &response, response_string);
     }
@@ -309,7 +309,6 @@ void handleConnection(int fd, struct sockaddr_in6 client, struct flags_struct fl
 
     if ((strncmp(request.path, "/cgi-bin", strlen("/cgi-bin")) == 0) && flags.c_flag) {
         execute_file(request.path, fd, is_valid_request, &response, response_string, flags);
-
     } else {
         if (strncmp(request.path, "/~", strlen("/~")) == 0) {
             getuserdir(request.path + 2, fd, request.if_modified_t, is_valid_request, &response, response_string);
@@ -342,8 +341,10 @@ void handleSocket(int socket, struct flags_struct flags) {
         pid = 0;
         debug_mode = true;
     } else {
-        pid = fork();
+        
     }
+
+    pid = fork();
 
     if (pid < 0) {
         perror("fork");
@@ -381,5 +382,15 @@ void handleSocket(int socket, struct flags_struct flags) {
         }
 
         handleConnection(fd, client, flags);
+    } else if (pid > 0) {
+        /** Parent */
+        if (flags.d_flag) {
+            int status = -1;
+            /** We don't need to worry about the status of the child.
+             * The purpose of this wait is to make the parent blocking until and unless this request is being served
+             * which is the whole point of debug mode.
+             */
+            (void)waitpid(pid, &status, 0);
+        }
     }
 }

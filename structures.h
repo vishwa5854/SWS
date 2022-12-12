@@ -1,10 +1,10 @@
 #ifndef STRUCTURES_H_
 #define STRUCTURES_H_
 
-#include <sys/syslimits.h>
-#include <time.h>
 #include <sys/stat.h>
+#include <sys/syslimits.h>
 #include <sys/types.h>
+#include <time.h>
 
 /** GET or HEAD + '\0' */
 #define HTTP_VERB_MAX_LEN 5
@@ -67,11 +67,6 @@
 /** Default port is port 8080 if no port is passed via -p*/
 #define DEFAULT_PORT "8080"
 
-/** TODO: Update the regex for two other formats mentioned in the RFC */
-
-// redefine HHTP_DATE_REGEX as OR of the three regex already defined
-
-// THIS IS JUST RFC-1123 DATE
 #define HTTP_DATE_REGEX "(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"
 
 #define RFC_850_DATE_REGEX "(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), ([0-3][0-9])-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-([0-9][0-9]) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT"

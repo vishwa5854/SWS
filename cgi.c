@@ -47,7 +47,6 @@ int execute_file(const char *executable_path, int socket_fd,
     (void)strncpy(query_string, "QUERY_STRING=", strlen("QUERY_STRING="));
     query_string[13] = '\0';
     
-    // (void)printf("Hello World: %d\n", query_string[13]);
     const char *executable_path_after_strtok;
     const char *parameters;
 

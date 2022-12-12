@@ -1,3 +1,743 @@
+commit 2ee9a2240e3f13ae35c006bca61c108335d9179d
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Dec 12 06:22:52 2022 -0500
+
+    EVerything is working, I will refactor and remove things not needed morning
+
+commit aee45f1d1a73ed06667aa2be174901e413bdf7a7
+Merge: 64a17cc d0ca253
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Dec 12 04:31:56 2022 -0500
+
+    Merge branch 'Anmol-working-branch' into cgi-integration
+
+commit 64a17cc41e68adb67fdb1a4a7807a0e35a670b64
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Dec 12 04:05:48 2022 -0500
+
+    added changes to cgi.c and handler.c for handling & values and if cgi-bin else anmol's code
+
+commit 8762e7e7ea2208f12a41c7b7a7f674c84a265167
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Dec 12 01:59:19 2022 -0500
+
+    changed the cgi.c by removing malloc
+
+commit c1c23deb8aa55ce2b1c8381033a6b4cb026e9012
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sun Dec 11 20:33:01 2022 -0500
+
+    Updated the regex of http url path validation
+
+commit 73e731e872c457d214db4db34b6e1fd6af0e0d3a
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sun Dec 11 20:21:24 2022 -0500
+
+    CGI integration is done
+
+commit 29eb73f0651c7a94385beee2437bcd663724fcba
+Merge: b190f52 56ab14c
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sun Dec 11 16:21:11 2022 -0500
+
+    Merge pull request #23 from RealOkabe/lgembarz-main
+    
+    fixed -p merge issue and flag strings
+
+commit 56ab14c3db91bbe2185fa0520afc42ee19b7a2a8
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sun Dec 11 16:15:46 2022 -0500
+
+    strnlen stuff
+
+commit d0ca253bc0c3ee5e0c66eed3414d866959f8745b
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 16:10:45 2022 -0500
+
+    Compiling everything now
+
+commit 046f59d5fca78ec1c83047fa56e48c73334e54eb
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 16:09:22 2022 -0500
+
+    Integrated a lot of stuff here
+    
+    Added support for HEAD calls, logger, readdirs and getuserdir
+
+commit 186018ccd25adff6fa6bbb1c4311091f3ad84011
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 16:06:32 2022 -0500
+
+    Fixed logger to create file and write to it
+
+commit b190f52b108c1ad7af0d12e9304930ff1c58548d
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sun Dec 11 15:29:25 2022 -0500
+
+    Update README.md
+
+commit 721d07571a2a7f2ef2a1a5b770705034382927fa
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sun Dec 11 15:19:36 2022 -0500
+
+    fixed -p merge issue and flag strings
+
+commit b5d50994ca66f7a7871d4b4cccc68540c3a280e9
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 14:13:01 2022 -0500
+
+    Dropped absolute path
+    
+    Because it seemed like a security risk and made things way too complicated
+
+commit 4c11aa44d0ae0cfe033f1f9f427c872cf2511bb4
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 12:18:24 2022 -0500
+
+    Try allocating memory without INT_MAX
+
+commit e43550606b3b5db100def5e28b8c23a39de03778
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 11:32:15 2022 -0500
+
+    Allocate buffer first
+
+commit 662a7563c208dfad58a68c0224b04da2312a798b
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 11:19:26 2022 -0500
+
+    Fixed mtim and i->count
+
+commit 3b46085d5a66fe0d04d8ed203ccc84fcf6bbb8ed
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 11:13:57 2022 -0500
+
+    Added fixes for sorting
+
+commit f4448ce63515941606fc7f310a1750381fa6bbb8
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 11:04:37 2022 -0500
+
+    Removed useless free call
+
+commit 4fb70aa821f975f3dececcc3d6cfd361a066639d
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 11:03:19 2022 -0500
+
+    Added buffer to store and sort output. Also tweaked the free calls
+
+commit 20d6bd31bac8e26370057fd8978f94628c8c9e13
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 10:36:10 2022 -0500
+
+    Added free calls and bzero calls
+
+commit 9a683eed919993a357de17ca9bbc0d1a23c1b830
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 07:49:31 2022 -0500
+
+    Added modified_since in getuserdir
+
+commit a75f9f5bf314fd24369b3121b8a0f61205e962ca
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 07:33:55 2022 -0500
+
+    Made some general variable type fixes
+
+commit 8993949665cde27aadc259076b1e4719867fb657
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 07:17:19 2022 -0500
+
+    Added modified-since handling and last-modified header
+
+commit d18f912ef4a47ba0fc55ca3b3ed95c0d0755adb3
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 04:35:09 2022 -0500
+
+    Added code to check if-modified-since header time
+    
+    If the file was modified after the time specified in if-modified-since, then status code 304 will be set. Otherwise, the file will be sent.
+    Also switched from return to close_connection(fd);
+
+commit fed3a87b92a4722e8e61d33b2a62431e72f64dfb
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 11 03:41:56 2022 -0500
+
+    Removed puts, added send_headers and close_connection
+
+commit 87236903c7c557ce130cffb7e087e4e47bc17754
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Dec 10 23:30:47 2022 -0500
+
+    Modified files to work like they should have
+
+commit ac936418c76b9a02736093232381315b5b59aa39
+Merge: 35b715e 45a8d3d
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 21:05:39 2022 -0500
+
+    Merge pull request #19 from RealOkabe/Anmol-working-branch
+    
+    Anmol working branch
+
+commit 35b715e46ec894fcdfa7052e3c486a46b8f57314
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 21:04:23 2022 -0500
+
+    Some intermediate URL parsing
+
+commit 85412e55546b8161cc5e808c13004237e6f208d4
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 20:35:23 2022 -0500
+
+    Fixed server stopping after one request in debug mode :)
+
+commit 45a8d3d21c8149f2dd4c387c794ddb833a07d47d
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Dec 10 20:04:22 2022 -0500
+
+    Modified readdirs and getuserdir to work with a passed workingdir
+
+commit 9c315d1a014d5b9bebab93169a7a94ba9d7826c8
+Merge: 6e8230c c7a3fc4
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 20:02:04 2022 -0500
+
+    Merged formatted code into main
+
+commit 6e8230cd1a2091b0e13974e6eaf89c46f072b962
+Merge: 45eff0b 391f448
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 19:55:09 2022 -0500
+
+    Merge pull request #20 from RealOkabe/lgembarz-working-branch
+    
+    unrecognized headers bug fixed
+
+commit c7a3fc45964e110874fca59bf99691de3a37ec23
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 19:48:20 2022 -0500
+
+    Reformatted files, fixed server exiting after one request in d mode
+
+commit 391f448fe056b9d8585de9cca39782102e6a8e11
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Dec 10 18:55:05 2022 -0500
+
+    added dir arg
+
+commit d931739c82dea523669890cb4d41b42e5fd7b858
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Dec 10 18:31:51 2022 -0500
+
+    Append ./ if the request just contains a file name
+    
+    Made it in the directory escaping guard
+
+commit 0de5502f8fd43e9fa10291ff1bb3191fbbca8cc6
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Dec 10 18:04:38 2022 -0500
+
+    hard coded flag nums now defined in structures.h
+
+commit 30f64bf47623e1fff1da14aff1f7fb52160f0835
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Dec 10 17:40:55 2022 -0500
+
+    unrecognized headers bug fixed
+
+commit 45eff0b21e549fd31051f2fe88c97d3a2f5eaa8c
+Merge: 041c52e e40163a
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sat Dec 10 17:15:18 2022 -0500
+
+    Merge pull request #18 from RealOkabe/lgembarz-working-branch
+    
+    -i, deafult port of 8080, -d timeout bug, if-modified-since string to time_t in request implemented
+
+commit e40163a486c9e1163a80072c6376f05f2da7b5c0
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Sat Dec 10 16:52:56 2022 -0500
+
+    backlog of 128
+
+commit db8ce3342cbd716d9a077bc55526479968baf344
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 20:02:20 2022 -0500
+
+    any if-mod-since str to a time_t since epoch working
+
+commit 041c52e0ba74c67aa884dc44ef21fd0beb826336
+Merge: f9123f5 34cbfcc
+Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
+Date:   Fri Dec 9 19:59:15 2022 -0500
+
+    Merge pull request #17 from RealOkabe/Anmol-working-branch
+    
+    Fixed writing to the socket
+
+commit 9ced79170438cd9ad7e0b362a50e3cfed5fe316f
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 18:24:18 2022 -0500
+
+    if-modified-since compiles but untested
+
+commit f9123f586748e318fff7a0bc7325d4187c81eaeb
+Merge: 9ca24e1 157637d
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Fri Dec 9 17:56:21 2022 -0500
+
+    Merge pull request #16 from RealOkabe/Anmol-working-branch
+    
+    Formatted the files
+
+commit d20bd8c8d762176172eb1a376a3804e7d227527f
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 17:19:51 2022 -0500
+
+    small fixes and cleanup
+
+commit 9ca24e1cc2988697a7fa6bd332627fd45096760c
+Merge: 142107c 043c6e5
+Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
+Date:   Fri Dec 9 17:16:51 2022 -0500
+
+    Merge pull request #15 from RealOkabe/Anmol-working-branch
+    
+    Fixed error handling
+
+commit 7c5d64193a5fb90be91eff7a689a064245780fb3
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 04:44:02 2022 -0500
+
+    added regex for all accepted date formats
+
+commit 94703689a975622fae9b01156b0bb8403de4acd2
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 04:09:30 2022 -0500
+
+    d flag timeout fixed
+
+commit 6cc946eec1d98ef41179ab45c21bbded6be49fef
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Fri Dec 9 02:43:50 2022 -0500
+
+    -i seeems to work
+
+commit 14865bebe76855d82e05d7b7d5832d89a9fb2a5e
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Thu Dec 8 04:24:50 2022 -0500
+
+    committing for tn, only ::1 working
+
+commit 142107c2e9dfae968a3a2cbb264316162370d984
+Merge: 33936bb e05d031
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Thu Dec 8 00:30:43 2022 -0500
+
+    Merge pull request #13 from RealOkabe/lgembarz-working-branch
+    
+    daemon and -d working
+
+commit e05d03127215d5e6297d8b945c64257ecc056f07
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Wed Dec 7 16:21:00 2022 -0500
+
+    daemon timeout fix
+
+commit fd9891cf776f5d604b6c8f179a6099c6499938dc
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Wed Dec 7 15:32:48 2022 -0500
+
+    daemon and -d completed and code cleaned
+
+commit 9f900c715469f4b7dc71bd9ffab912e9e0e1a809
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Wed Dec 7 15:06:26 2022 -0500
+
+    daemon just working
+
+commit 33936bb483367fc78c9ffc75cc0307a8b9c61ad3
+Merge: 87dcb8c 037ac44
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Wed Dec 7 14:10:29 2022 -0500
+
+    Merge pull request #10 from RealOkabe/Anmol-working-branch
+    
+    Logger is also done.
+
+commit 5dbd4316ffaf143657cd8ad593c436419b011277
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 12:30:49 2022 -0500
+
+    Added NULL checks
+    
+    This was added to make sure that if the request just contains a username, then the function will do directory indexing.
+
+commit 268ef967ebc0db31d4bda5df4d8bbfa8bb620ce3
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 11:50:46 2022 -0500
+
+    Added flag to prevent segfault
+
+commit 8933c4cdc341bfd8d2225b12abf5fb287f1301ac
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 11:42:44 2022 -0500
+
+    Removed some more useless code
+
+commit aa94f431c6cae322b01e8c37a7291113b9eff657
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 11:40:44 2022 -0500
+
+    Removed count variable since it wasn't being used anymore
+
+commit 5ced96736fa5c355a5687c0e821dda611f3149b1
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 11:37:20 2022 -0500
+
+    Added code to handle a case in which only username is specified
+    
+    Now, if the request only contains the username without any / then the function will resolve it to /home/<user>/sws
+    Also, changed the readdirs function call with false flag to get past the directory escape guard. getuserdir has its own guard for that.
+
+commit 230d12eb316b154efdde568b93ea66619713c008
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 11:32:04 2022 -0500
+
+    Added a flag argument to readdirs
+    
+    This was added to distinguish between readdirs calls from the server and the getuserdir function.
+
+commit 34cbfccc638bf0a7da64725434232c79364b6019
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 08:00:32 2022 -0500
+
+    Fixed writing to the socket
+    
+    Completely removed the char** dirs because getting data from it was a pain. Now we will directly write to the socket file descriptor. Also, the code to prevent user from escaping had a bug. Solved that as well.
+
+commit 157637d6408e04146063a2ef84545b247495e5f0
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 05:54:57 2022 -0500
+
+    Formatted the files
+    
+    To stay consistent with the rest of the project files.
+
+commit 043c6e52e78f9edfa72931352a2b948717e878b6
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 05:14:14 2022 -0500
+
+    Follow POSIX coding standards of using { even when there's one statement after if condition
+
+commit 7b992de4096fc1bc432f6fd95e0c125e86b3a195
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 03:41:28 2022 -0500
+
+    Added error sending to the server in readdirs and getuserdir
+    
+    Using the send_error function in the handler.c. Also fixed the import statement in readdirs.c
+
+commit ed00b869120c91c3f965f4959ded8f85aa9fd0a7
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 03:11:53 2022 -0500
+
+    Modified readdirs to take more arguments for error sending
+
+commit b1e7868c8196ccb71351074ef91c507bf9ae4304
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 03:09:14 2022 -0500
+
+    Modified getuserdir to take more arguments
+    
+    This was done for sending errors
+
+commit 1258908734514bdd91c9e29943adbb7d218213c7
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 02:56:02 2022 -0500
+
+    Modified getuserdir to also take socket file descriptor
+    
+    It will pass that to readdirs in the end
+
+commit 3be76f1046a357f36bc0b0127c6c9c53937c2be8
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 02:52:01 2022 -0500
+
+    Modified readdirs to take socket file descriptor as an argument
+    
+    Also made sure to copy the output to the said file descriptor
+
+commit 9489b90d743391c67d092bb766e7f2991684c6b7
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 02:42:11 2022 -0500
+
+    Modified readdirs and getuserdir to return void
+    
+    Haven't made the real modifications yet. Just changed the return type
+
+commit 9b5a9567098135442ffe43481b020b01ad5088a2
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Dec 5 00:50:48 2022 -0500
+
+    Take file descriptors instead of file names
+    
+    This was done so that logs could also be written to the Standard Output
+
+commit 037ac44ac4234d656b461c283b0c48d651a8f698
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 4 13:24:13 2022 -0500
+
+    Switched to append mode for write
+    
+    Did so because we will be taking logs again and again. Don't want to truncate the file everytime a request comes.
+
+commit a8cec558a3b8ca4d972ea4b95524ff50293ddd8a
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 4 13:14:12 2022 -0500
+
+    Logger now writes logs to the file
+    
+    If the file does not exist, it will create it and will truncate it. Probably not the best behaviour but it works for now.
+
+commit 4f5d4ae73857bdd06cc882779f85499dadbf9eee
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Dec 4 13:12:24 2022 -0500
+
+    Modified writelog function
+    
+    Now as input it will take the request, response and the ip address that made that request.
+
+commit 43b536dfca6a8a5f971e15a7635e7fa5344fe40b
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 19:07:58 2022 -0500
+
+    Send headers function is done.
+
+commit 9e5fc8e4c353fadb97134239b673c1113f4d5725
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 14:07:59 2022 -0500
+
+    Changed few comments
+
+commit f2c1d5051d23e2d6068bc1b76d1bb5d016d6f5ab
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 14:00:37 2022 -0500
+
+    Max header length, maximum number of headers accepted are done.
+
+commit 03c85196c83b9b4ba7a29c335acea89b1af96121
+Author: vish <vishwanath5854@outlook.com>
+Date:   Fri Dec 2 01:06:57 2022 -0500
+
+    Rewritten the server logic to accept entire payloads and partial payloads
+
+commit 5a8e4218e37344f35ed40bb3c40ce3b162aa028b
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Dec 3 23:43:49 2022 -0500
+
+    Added logger header file
+    
+    Including the log function
+
+commit 87dcb8c8d17d9c9782f01d094cc8d5ae4e03f133
+Merge: f80e955 dffe8ad
+Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
+Date:   Sat Dec 3 23:37:35 2022 -0500
+
+    Merge pull request #9 from RealOkabe/z
+    
+    Rewritten the server logic to accept entire payloads and partial payl…
+
+commit dffe8adb73067ca005d5e83264f55f5e96c5cdf3
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 19:07:58 2022 -0500
+
+    Send headers function is done.
+
+commit db287baa20823e52cf1df16dbdc4811cb8f4f07a
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 14:07:59 2022 -0500
+
+    Changed few comments
+
+commit f80e9557a1a2d5c1c7ac1f256d073e2cd6738df1
+Merge: a81e5dc 67e254c
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 14:05:20 2022 -0500
+
+    Merge pull request #8 from RealOkabe/Anmol-working-branch
+    
+    User directories and directory indexing seem to have been completed.
+
+commit 7af646f04243c29fc5be11d87d9e4ea7d692bba8
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Dec 3 14:00:37 2022 -0500
+
+    Max header length, maximum number of headers accepted are done.
+
+commit 7ee2b0625a957ab0349d6b039a8b43e71454e12b
+Author: vish <vishwanath5854@outlook.com>
+Date:   Fri Dec 2 01:06:57 2022 -0500
+
+    Rewritten the server logic to accept entire payloads and partial payloads
+
+commit 67e254c6c84e2e6cf8bc2f5f66f2c244f52768a4
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Thu Dec 1 15:01:20 2022 -0500
+
+    Prevent user from escaping the user directory
+    
+    Resolve the final constructed path to an absolute path using realpath and compare it with the user's home path using strncmp.
+
+commit a81e5dcb184634fd36bcbdae0312caf37b90d215
+Merge: 61c4b5d 83494bc
+Author: lgembarz <59267561+lgembarz@users.noreply.github.com>
+Date:   Wed Nov 30 17:45:22 2022 -0500
+
+    Merge pull request #7 from RealOkabe/lgembarz-working-branch
+    
+    Pull Request for IPV6 support and Port Num fix/checking
+
+commit 83494bcd64d2b09d670f0dd7e4ef7153a384b91b
+Merge: 60ab1d4 61c4b5d
+Author: lgembarz <59267561+lgembarz@users.noreply.github.com>
+Date:   Wed Nov 30 17:45:15 2022 -0500
+
+    Merge branch 'main' into lgembarz-working-branch
+
+commit 61c4b5ddefc7e5ac2fdb385f2e8d33868ba2bd5a
+Merge: 0c63e77 fb16729
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Wed Nov 30 15:34:31 2022 -0500
+
+    Merge pull request #6 from RealOkabe/z
+    
+    Time out is kind of done bruh
+
+commit 60ab1d4c4d9fdf47ce8b6714ae48f181bb09a5e1
+Merge: 8b5003b 16ace0d
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Tue Nov 29 16:16:16 2022 -0500
+
+    merge conflict resolved
+
+commit 8b5003b46c8dd3ea98f5cf42c579046b7dfb420d
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Tue Nov 29 16:04:49 2022 -0500
+
+    ipv6 and port number check working
+
+commit fb16729b548773913bb40a08c299bcd62f325ff8
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 28 21:04:47 2022 -0500
+
+    Correction in comment
+
+commit 8ac2c5640d4b0de03e280ac722e254ecba9bfe85
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 28 20:58:38 2022 -0500
+
+    Time out is kind of done bruh
+
+commit 0c63e779d55ffb38c45ac17210f78b26f280576b
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 28 19:32:36 2022 -0500
+
+    Restructured a bunch of things
+
+commit 7f3a39bf2fb0fa99364045e463e58ea434ad9c6a
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Mon Nov 28 17:28:15 2022 -0500
+
+    ipv4 and v6 supported
+
+commit 16ace0d47334245a529152a3f08de81719edae2a
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 28 16:16:56 2022 -0500
+
+    Added few CGI changes and http URL validation as well
+
+commit e7e252d593de8eb451d8a2f3f55ef5f28ea165e0
+Merge: 8e8fb05 23ea06e
+Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
+Date:   Sat Nov 26 14:53:46 2022 -0500
+
+    Merge pull request #5 from RealOkabe/siddharth_cgi
+    
+    changed the order of exe
+
+commit 23ea06e7b205b0ce27130429774e9f35ca6e1428
+Merge: 741dfa8 8e8fb05
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Sat Nov 26 14:52:47 2022 -0500
+
+    merge main into the siddharth_cgi
+
+commit 741dfa8004a8c08fad7cd70d76fba6b8bf3a9393
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Sat Nov 26 14:45:23 2022 -0500
+
+    changed the order of exe
+
+commit 8e8fb056ace74139a59996f3f594eeaebf557cb4
+Author: vish <vishwanath5854@outlook.com>
+Date:   Sat Nov 26 14:36:10 2022 -0500
+
+    New Questions and TODOS
+
+commit 535eb0f0c76aa3d93a360160ccdc83e945a85d35
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 15:11:55 2022 -0500
+
+    Snapshot created
+
+commit 126caa5fd8e9e4da4b85ae1ac8033e2807bcbf3e
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 15:07:34 2022 -0500
+
+    Deleted dup makefile and added todo
+
+commit 85a318ace7c3e6cb4f5a305bf8b18e7989f1f458
+Author: vish <vishwanath5854@outlook.com>
+Date:   Mon Nov 21 15:04:02 2022 -0500
+
+    Created a submission folder
+
+commit 3c8ed0962578d37e3ec89ffc329e1f5b62c4ee8a
+Merge: 18a4bee a682c74
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Nov 21 15:01:28 2022 -0500
+
+    Merge branch 'siddharth_cgi'
+
+commit 8d1c845a1a017545d9a33b75e2346306a8ab2f4c
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Mon Nov 21 15:01:24 2022 -0500
+
+    corrected port nums
+
+commit 18a4bee3ff9a3902e030948fe944a7595c197db4
+Merge: bdc2bfe 24c1912
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Nov 21 15:01:12 2022 -0500
+
+    Merge branch 'main' of https://github.com/RealOkabe/CS631-Group-Assignment-SWS
+
+commit a682c74db1306929532ab3ff0ebb92d923bd10db
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Nov 21 15:00:31 2022 -0500
+
+    tried changing the code
+
+commit bdc2bfeaa2d6b5553d47f44ad0d74cd2685cdd58
+Merge: 8420014 eb85ed8
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Mon Nov 21 14:57:30 2022 -0500
+
+    Merge branch 'siddharth_cgi'
+
 commit 24c19124e02b56c4e559470ab0566087ce5b1991
 Merge: 870c0e9 d029e11
 Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
@@ -25,6 +765,18 @@ Date:   Mon Nov 21 13:02:27 2022 -0500
 
     Sample responses are working
 
+commit d8ebd02b88f325e1321b41b0b58a6359200fa6b1
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Mon Nov 21 02:17:38 2022 -0500
+
+    port arg integrated
+
+commit f303cd65b176917dbf4bf0a57de29052475bbb63
+Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
+Date:   Mon Nov 21 01:53:04 2022 -0500
+
+    handleSocket debug support added
+
 commit 870c0e9f38de953c93155db02aa544a5278e6588
 Merge: 476ff1f 966b465
 Author: Vishwanath Bondugula <vishwanath5854@outlook.com>
@@ -34,12 +786,30 @@ Date:   Sun Nov 20 18:14:50 2022 -0500
     
     Merge readdirs and getuserdirectories
 
+commit eb85ed8a4d2321196583c8e3a0bcc6cdea1d63d0
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Sat Nov 19 23:44:43 2022 -0500
+
+    added the functionality to add all the execl output to /tmp/files after the suggestions
+
 commit 966b465f9746f60b81de8e97909a0672027d0451
 Merge: 2add7da 476ff1f
 Author: MadScientist <30712598+RealOkabe@users.noreply.github.com>
 Date:   Fri Nov 18 21:32:05 2022 -0500
 
     Merge branch 'main' into Anmol-working-branch
+
+commit af08f72ae61c21a2f33807acbab39a37482e2c0e
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Fri Nov 18 20:22:21 2022 -0500
+
+    adding the /tmp/* file structure
+
+commit e16cf5059430fb25de3a72a1ef2e3d67aee19cb5
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Thu Nov 17 20:41:53 2022 -0500
+
+    repaired last commit code added null terminator will next time convert into strlcat
 
 commit 99462dc6391a935a14bb3dc33b6ba0ad689fd463
 Merge: 2ee5c29 476ff1f
@@ -92,11 +862,43 @@ Date:   Wed Nov 16 16:20:05 2022 -0500
 
     Removed unnecessary files, renamed few things
 
+commit f6344718fe8d992506b13cd84e289d60ee98a01f
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Wed Nov 16 15:07:00 2022 -0500
+
+    in cgi.c taking the argument and adding a variable which will act as the root directory of the server and concat it with requested execution with it and putting all the output in the buffer TODO now put all the data in a file
+
+commit acc9e797b62d3712b4610ffe3c5772b58b3e6328
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Wed Nov 16 11:12:58 2022 -0500
+
+    repairing header files for cgi.c and cgi.h
+
+commit be3290dd8c923f1a064ce02b8fe196bb00ec4022
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Wed Nov 16 11:08:02 2022 -0500
+
+    adding all the basic code involved for CGI
+
 commit d9f4016c38b1f72ad53615849c06e8e62cde7a34
 Author: lgembarz <lucas@DESKTOP-NOLVPF7.localdomain>
 Date:   Wed Nov 16 11:01:41 2022 -0500
 
     usage and args done, debug outlined
+
+commit 05eedc74d743ea0ed95963d89d34918fb2ba4ab1
+Merge: 4199eb2 264e2eb
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Wed Nov 16 10:54:41 2022 -0500
+
+    Merge branch 'main' of https://github.com/RealOkabe/CS631-Group-Assignment-SWS into siddharth_cgi
+
+commit 8420014af252b20ae2f67b704d879cfca2ba65a3
+Merge: 4199eb2 264e2eb
+Author: siddharth1998 <siddharth1998@gmail.com>
+Date:   Wed Nov 16 10:52:27 2022 -0500
+
+    Merge branch 'main' of https://github.com/RealOkabe/CS631-Group-Assignment-SWS
 
 commit 8d99fb43a5f7ec105362e45796b941e14e30abb1
 Author: vish <vishwanath5854@outlook.com>
@@ -128,6 +930,32 @@ Date:   Mon Nov 14 11:20:06 2022 -0500
 
     Few basics are done :)
 
+commit 3ee0fb4126dabad0bab17d8897c865fc0a6a213b
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Nov 14 06:46:37 2022 -0500
+
+    Added code to access any user's sws directory
+    
+    Now the getuserdir will get a username/requested/content string and resolve it to /home/<username>/sws/requested/content and call readdirs on that
+    This is the expected behavior for that.
+
+commit 8316590642a45bb972fc8ea1c3a36e4bf9cc2bea
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Nov 14 06:07:35 2022 -0500
+
+    Added path validation to prevent user from escaping the server directory
+    
+    We resolve the provided path to realpath, compare it to the current working directory and prevent user from escaping.
+    Also added code to prevent printing of files whose names start with a '.'
+
+commit 0275f6d19edae73de5e5c543710c87043dba550a
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Mon Nov 14 05:17:33 2022 -0500
+
+    Added code to get user directory using getpwuid
+    
+    We only need to serve contents of the sws directory of the user running the server instead of just any user
+
 commit 15f3d8deae9752a86f29ff96eb864f1c137810d2
 Author: vish <vishwanath5854@outlook.com>
 Date:   Sun Nov 13 20:35:09 2022 -0500
@@ -139,6 +967,23 @@ Author: vish <vishwanath5854@outlook.com>
 Date:   Sun Nov 13 20:24:38 2022 -0500
 
     Added few structures, util functions
+
+commit 3033f91f4667c952af7d7364f1137e9f76518b2f
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sun Nov 13 07:02:17 2022 -0500
+
+    Readdirs can now open files
+    
+    If the path passed as an argument points to a file rather than a directory, then readdirs will read the contents of the file and return them line by line
+
+commit ef0c0b193f1eab9be770deb7860ef83a3e0ffb6e
+Author: RealOkabe <anmolzagrawal@gmail.com>
+Date:   Sat Nov 12 18:34:51 2022 -0500
+
+    Removed the flag argument
+    
+    The flag argument was used to differ the behavior of the program between getting a directory or getting a user, but there is no need to do that.
+    If the request is for a user directory i.e. /home/<user>/sws if the sws directory has an index.html, serve it.
 
 commit 264e2eb3367da8c589243cb081e3f1e4980755f3
 Author: siddharth1998 <siddharth1998@gmail.com>

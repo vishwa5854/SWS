@@ -1,13 +1,15 @@
+#include "util.h"
+
 #include <limits.h>
 #include <regex.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
 #include <time.h>
-#include "util.h"
+
 #include "cgi.h"
 
-/** 
+/**
  * This is util function which will generate current time like
  * Tue, 15 Nov 1994 08:12:31 GMT
  * This function is inspired by https://s.vishw.site/KeTK7
@@ -30,7 +32,6 @@ bool is_valid(char* str, char* regex_comparator) {
     return false;
 }
 
-/** TODO: Instead of taking a string, just take the filedescriptor and write to the stream instead :) */
 int create_response_string(RESPONSE* response, char* response_str) {
     if (response->protocol != NULL) {
         (void)sprintf(response_str, "%s", response->protocol);
@@ -126,7 +127,7 @@ void get_status_verb(int status_code, char* status_verb) {
     }
 }
 
-int find_third_slash(char *path) {
+int find_third_slash(char* path) {
     ssize_t n_path = strlen(path);
     ssize_t i = 0;
     int count = 0;
@@ -146,19 +147,17 @@ int find_third_slash(char *path) {
 
 bool create_request_frame(REQUEST* request, char* token, int token_number) {
     bool valid = true;
+    /** If the path has single quotes or double quotes in the start and end we will remove them. */
+    char resolved_token[strlen(token)];
 
     switch (token_number) {
         /** GET or HEAD */
         case 0:
-            if (
-                (strlen(token) == strlen(SUPPORTED_HTTP_VERB_1)) &&
-                (strncmp(token, SUPPORTED_HTTP_VERB_1, strlen(SUPPORTED_HTTP_VERB_1)) == 0)
-            ) {
+            if ((strlen(token) == strlen(SUPPORTED_HTTP_VERB_1)) &&
+                (strncmp(token, SUPPORTED_HTTP_VERB_1, strlen(SUPPORTED_HTTP_VERB_1)) == 0)) {
                 (void)strncpy(request->verb, token, strlen(token));
-            } else if (
-                (strlen(token) == strlen(SUPPORTED_HTTP_VERB_2)) &&
-                (strncmp(token, SUPPORTED_HTTP_VERB_2, strlen(SUPPORTED_HTTP_VERB_2)) == 0)
-            ) {
+            } else if ((strlen(token) == strlen(SUPPORTED_HTTP_VERB_2)) &&
+                       (strncmp(token, SUPPORTED_HTTP_VERB_2, strlen(SUPPORTED_HTTP_VERB_2)) == 0)) {
                 (void)strncpy(request->verb, token, strlen(token));
             } else {
                 valid = false;
@@ -166,35 +165,33 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
             }
             break;
         case 1:
-            valid = is_valid(token, HTTP_URL_REGEX) || is_valid(token, FILE_PATH_REGEX);
-            puts("Is it valid bruh ???");
-            printf("%d\n", valid);
-            puts("PATH IS");
-            puts(token);
-
-            /** This URL contains a prefix of http://localhost:port_num/ */
-            if (is_valid(token, HTTP_URL_REGEX)) {
-                int location = find_third_slash(token);
-                (void)strncpy(request->path, token + location - 1, strlen(token));
-                puts(request->path);
+            if ((token[0] == '\'') && (token[strlen(token) - 1] == '\'')) {
+                (void)strncpy(resolved_token, token + 1, strlen(token) - 2);
+            } else if ((token[0] == '\"') && (token[strlen(token) - 1] == '\"')) {
+                (void)strncpy(resolved_token, token + 1, strlen(token) - 2);
             } else {
-                (void)strncpy(request->path, token, strlen(token));
+                (void)strncpy(resolved_token, token, strlen(token));
+                resolved_token[strlen(token)] = '\0';
+            }
 
+            valid = is_valid(resolved_token, HTTP_URL_REGEX) || is_valid(resolved_token, FILE_PATH_REGEX);
+            
+            /** This URL contains a prefix of http://localhost:port_num/ */
+            if (is_valid(resolved_token, HTTP_URL_REGEX)) {
+                int location = find_third_slash(resolved_token);
+                (void)strncpy(request->path, resolved_token + location - 1, strlen(resolved_token));
+            } else {
+                (void)strncpy(request->path, resolved_token, strlen(resolved_token));
             }
             break;
         case 2:
             /** Protocol and version check bruh. */
             token[strcspn(token, "\r\n")] = '\0';
 
-            if (
-                (strlen(token) != strlen(SUPPORTED_PROTOCOL_1)) && 
-                (strlen(token) != strlen(SUPPORTED_PROTOCOL_2))
-            ) {
+            if ((strlen(token) != strlen(SUPPORTED_PROTOCOL_1)) && (strlen(token) != strlen(SUPPORTED_PROTOCOL_2))) {
                 valid = false;
-            } else if (
-                (strncmp(token, SUPPORTED_PROTOCOL_1, strlen(SUPPORTED_PROTOCOL_1)) != 0) &&
-                (strncmp(token, SUPPORTED_PROTOCOL_2, strlen(SUPPORTED_PROTOCOL_2)) != 0)
-            ) {
+            } else if ((strncmp(token, SUPPORTED_PROTOCOL_1, strlen(SUPPORTED_PROTOCOL_1)) != 0) &&
+                       (strncmp(token, SUPPORTED_PROTOCOL_2, strlen(SUPPORTED_PROTOCOL_2)) != 0)) {
                 valid = false;
             } else {
                 (void)strncpy(request->protocol, "HTTP", 4);
@@ -208,15 +205,15 @@ bool create_request_frame(REQUEST* request, char* token, int token_number) {
                 request->if_modified_str_type = 1;
                 (void)strncpy(request->if_modified_since, token, strlen(token));
             } else if (is_valid(token, RFC_850_DATE_REGEX)) {
-                valid=true;
+                valid = true;
                 request->if_modified_str_type = 2;
                 (void)strncpy(request->if_modified_since, token, strlen(token));
             } else if (is_valid(token, ASCTIME_DATE_REGEX)) {
-                valid=true;
+                valid = true;
                 request->if_modified_str_type = 3;
                 (void)strncpy(request->if_modified_since, token, strlen(token));
             } else {
-                valid=false;
+                valid = false;
             }
             break;
         default:
@@ -233,6 +230,7 @@ void reset_response_object(RESPONSE* response) {
     bzero(response->server, sizeof(response->server));
     bzero(response->last_modified, sizeof(response->last_modified));
     bzero(response->content_type, sizeof(response->content_type));
+    response->content_length = 0;
 }
 
 void reset_request_object(REQUEST* request) {

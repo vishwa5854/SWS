@@ -12,7 +12,7 @@ Asana.com link : <a>https://app.asana.com/share/vishw/cs631/1203202255113786/ac1
 </a>
 
 <h1>Manual Page</h1>
-[embed]https://stevens.netmeister.org/631/sws.1.pdf[/embed]
+https://stevens.netmeister.org/631/sws.1.pdf
 
 
 

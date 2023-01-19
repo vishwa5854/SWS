@@ -42,3 +42,13 @@ https://stevens.netmeister.org/631/sws.1.pdf
 1. We have used command system library source code for our CGI from System V.
 2. We have used online websites like geeks for geeks in very few places where we couldn't figure
     out things from manual pages.
+    
+## How to Build?
+```sh
+make clean && make
+```
+
+## How to run?
+```sh
+./sws -p PORT_NUM -c CGI_BIN_PATH -l LOGGING_FILE_PATH WORKING_DIR_OF_SWS
+```

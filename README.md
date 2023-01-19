@@ -52,3 +52,8 @@ make clean && make
 ```sh
 ./sws -p PORT_NUM -c CGI_BIN_PATH -l LOGGING_FILE_PATH WORKING_DIR_OF_SWS
 ```
+
+## How to hit using CLI(CURL)?
+```sh
+curl --http1.0 -v --location --request GET 'http://localhost:PORT_NUM/cgi-bin/something.cgi' --header 'If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT'
+```
